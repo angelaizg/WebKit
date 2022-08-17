@@ -228,40 +228,51 @@ static size_t getOID(CryptoKeyEC::NamedCurve curve, const uint8_t*& oid)
 // secp521r1 OBJECT IDENTIFIER      ::= { iso(1) identified-organization(3) certicom(132) curve(0) 35 }
 RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportSpki(CryptoAlgorithmIdentifier identifier, NamedCurve curve, Vector<uint8_t>&& keyData, bool extractable, CryptoKeyUsageBitmap usages)
 {
-    // The following is a loose check on the provided SPKI key, it aims to extract AlgorithmIdentifier, ECParameters, and Key.
-    // Once the underlying crypto library is updated to accept SPKI EC Key, we should remove this hack.
-    // <rdar://problem/30987628>
-    size_t index = 1; // Read SEQUENCE
-    if (keyData.size() < index + 1)
+      // The following is a loose check on the provided SPKI key, it aims to extract AlgorithmIdentifier, ECParameters, and Key.
+      // Once the underlying crypto library is updated to accept SPKI EC Key, we should remove this hack.
+      // <rdar://problem/30987628>
+      size_t index = 1; // Read SEQUENCE
+      if (keyData.size() < index + 1)
         return nullptr;
-    index += bytesUsedToEncodedLength(keyData[index]) + 1; // Read length, SEQUENCE
-    if (keyData.size() < index + 1)
+      index += bytesUsedToEncodedLength(keyData[index]) + 1; // Read length, SEQUENCE
+      if (keyData.size() < index + 1)
         return nullptr;
-    index += bytesUsedToEncodedLength(keyData[index]); // Read length
-    if (keyData.size() < index + sizeof(IdEcPublicKey))
+      index += bytesUsedToEncodedLength(keyData[index]); // Read length
+      if (keyData.size() < index + sizeof(IdEcPublicKey))
         return nullptr;
-    if (memcmp(keyData.data() + index, IdEcPublicKey, sizeof(IdEcPublicKey)))
+      if (memcmp(keyData.data() + index, IdEcPublicKey, sizeof(IdEcPublicKey)))
         return nullptr;
-    index += sizeof(IdEcPublicKey); // Read id-ecPublicKey
-    const uint8_t* oid;
-    size_t oidSize = getOID(curve, oid);
-    if (keyData.size() < index + oidSize)
+      index += sizeof(IdEcPublicKey); // Read id-ecPublicKey
+      const uint8_t* oid;
+      size_t oidSize = getOID(curve, oid);
+      if (keyData.size() < index + oidSize)
         return nullptr;
-    if (memcmp(keyData.data() + index, oid, oidSize))
+      if (memcmp(keyData.data() + index, oid, oidSize))
         return nullptr;
-    index += oidSize + 1; // Read named curve OID, BIT STRING
-    if (keyData.size() < index + 1)
+      index += oidSize + 1; // Read named curve OID, BIT STRING
+      if (keyData.size() < index + 1)
         return nullptr;
-    index += bytesUsedToEncodedLength(keyData[index]) + 1; // Read length, InitialOctet
-
-    if (!doesUncompressedPointMatchNamedCurve(curve, keyData.size() - index))
-        return nullptr;
-
-    CCECCryptorRef ccPublicKey = nullptr;
-    if (CCECCryptorImportKey(kCCImportKeyBinary, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
-        return nullptr;
-
-    return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
+      index += bytesUsedToEncodedLength(keyData[index]); // Read length
+      uint8_t initialOctet = keyData[index];
+      index += 1;
+        
+        
+      bool uncompressed = initialOctet == 4 or initialOctet == 04 ;
+      bool compressed = initialOctet == 03 or initialOctet == 02;
+        
+        
+      CCECCryptorRef ccPublicKey = nullptr;
+        
+      if ( uncompressed ){
+       if ( CCECCryptorImportKey(kCCImportKeyBinary, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
+          return nullptr;
+      }
+        
+      if( compressed ){
+        if (CCECCryptorImportKey(kCCImportKeyCompact, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
+          return nullptr;
+      }
+      return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
 }
 
 Vector<uint8_t> CryptoKeyEC::platformExportSpki() const
