@@ -91,7 +91,6 @@ typedef uint32_t CCECKeyType;
 
 enum {
     kCCImportKeyBinary = 0,
-    kCCImportKeyCompact = 2,
 };
 typedef uint32_t CCECKeyExternalFormat;
 #endif
