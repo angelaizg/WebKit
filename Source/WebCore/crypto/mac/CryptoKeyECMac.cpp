@@ -256,21 +256,22 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportSpki(CryptoAlgorithmIdentifier id
     index += 1;
         
         
-    bool uncompressed = initialOctet == 4 or initialOctet == 04 ;
-    bool compressed = initialOctet == 03 or initialOctet == 02;
+    bool uncompressed = initialOctet == 4 ;
+    bool compressed = initialOctet == 3 or initialOctet == 2;
         
         
     CCECCryptorRef ccPublicKey = nullptr;
         
-    if ( uncompressed ){
-    if ( CCECCryptorImportKey(kCCImportKeyBinary, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
-          return nullptr;
-    }
+ 
         
     if( compressed ){
-    if (CCECCryptorImportKey(kCCImportKeyCompact, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
-          return nullptr;
-      }
+        if (CCECCryptorImportKey(kCCImportKeyCompact, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
+              return nullptr;
+    }
+    if ( uncompressed ){
+        if ( CCECCryptorImportKey(kCCImportKeyBinary, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
+              return nullptr;
+    }
       return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
 }
 
