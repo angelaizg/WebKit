@@ -23,7 +23,6 @@
 import json
 import sys
 from re import search
-
 from .command import Command
 from datetime import datetime
 from webkitcorepy import arguments
