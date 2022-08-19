@@ -35,6 +35,7 @@ from .squash import Squash
 from .checkout import Checkout
 from .credentials import Credentials
 from .find import Find, Info
+from .pickable import Pickable,Info
 from .install_git_lfs import InstallGitLFS
 from .land import Land
 from .log import Log
@@ -78,7 +79,7 @@ def main(
     subparsers = parser.add_subparsers(help='sub-command help')
     programs = [
         Blame, Branch, Canonicalize, Checkout,
-        Clean, Find, Info, Land, Log, Pull,
+        Clean, Find,Pickable,Info, Land, Log, Pull,
         PullRequest, Revert, Setup, InstallGitLFS,
         Credentials, Commit, DeletePRBranches, Squash
     ]
