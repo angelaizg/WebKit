@@ -254,16 +254,9 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportSpki(CryptoAlgorithmIdentifier id
     index += bytesUsedToEncodedLength(keyData[index]); // Read length
     uint8_t initialOctet = keyData[index];
     index += 1;
-        
-        
     bool uncompressed = initialOctet == 4 ;
     bool compressed = initialOctet == 3 or initialOctet == 2;
-        
-        
     CCECCryptorRef ccPublicKey = nullptr;
-        
- 
-        
     if( compressed ){
         if (CCECCryptorImportKey(kCCImportKeyCompact, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
               return nullptr;
@@ -272,7 +265,7 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportSpki(CryptoAlgorithmIdentifier id
         if ( CCECCryptorImportKey(kCCImportKeyBinary, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
               return nullptr;
     }
-      return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
+    return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
 }
 
 Vector<uint8_t> CryptoKeyEC::platformExportSpki() const
