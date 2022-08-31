@@ -251,17 +251,13 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportSpki(CryptoAlgorithmIdentifier id
     index += oidSize + 1; // Read named curve OID, BIT STRING
     if (keyData.size() < index + 1)
         return nullptr;
-    index += bytesUsedToEncodedLength(keyData[index]); // Read length
-    uint8_t initialOctet = keyData[index];
-    index += 1;
-    bool uncompressed = initialOctet == 4 ;
-    bool compressed = initialOctet == 3 or initialOctet == 2;
+    index += bytesUsedToEncodedLength(keyData[index])+1; // Read length
     CCECCryptorRef ccPublicKey = nullptr;
-    if( compressed ){
-        if (CCECCryptorImportKey(kCCImportKeyCompact, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
-              return nullptr;
-    }
-    if ( uncompressed ){
+    if (!doesUncompressedPointMatchNamedCurve(curve, keyData.size() - index)){
+        if (CCECCryptorImportKey(kCCImportKeyCompact, keyData.data() + index+1, keyData.size() - index-1, ccECKeyPublic, &ccPublicKey)){
+            return nullptr;
+        }
+    }else{
         if ( CCECCryptorImportKey(kCCImportKeyBinary, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
               return nullptr;
     }
