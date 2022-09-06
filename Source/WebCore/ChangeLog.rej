@@ -1,0 +1,23 @@
+@@ -1,3 +1,22 @@
++2022-08-30  Chris Dumez  <cdumez@apple.com>
++
++        [WebCrypto] decrypt() does not properly validate padding for AES-CBC algorithm
++        https://bugs.webkit.org/show_bug.cgi?id=227804
++
++        Reviewed by NOBODY (OOPS!).
++
++        decrypt() does not properly validate padding for AES-CBC algorithm:
++        - https://www.w3.org/TR/WebCryptoAPI/#aes-cbc-operations (Decrypt section)
++
++        No new tests, rebaselined existing tests.
++
++        * crypto/mac/CryptoAlgorithmAES_CBCMac.cpp:
++        (WebCore::CryptoAlgorithmAES_CBC::platformDecrypt):
++        Stop passing kCCOptionPKCS7Padding optional to Common Crypto when decrypting and
++        take care of validating and removing the padding ourselves, so that we can properly
++        throw an exception for invalid padding, as per:
++        - https://www.w3.org/TR/WebCryptoAPI/#aes-cbc-operations (Decrypt section)
++
+ 2021-07-08  Antti Koivisto  <antti@apple.com>
+ 
+         Shadow host stops rendering after removing a slot, updating style, then its assigned node

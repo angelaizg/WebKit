@@ -5723,6 +5723,8 @@
 		FB3056C2169E5DAC0096A232 /* CSSGroupingRule.h in Headers */ = {isa = PBXBuildFile; fileRef = FB3056C1169E5DAC0096A232 /* CSSGroupingRule.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		FB484F4D171F821E00040755 /* TransformFunctions.h in Headers */ = {isa = PBXBuildFile; fileRef = FB484F4B171F821E00040755 /* TransformFunctions.h */; };
 		FB92DF4B15FED08700994433 /* PathOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = FB92DF4915FED08700994433 /* PathOperation.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		FB93FE9E28C611EF00BA5661 /* CryptoAlgorithmEd25519.hpp in Headers */ = {isa = PBXBuildFile; fileRef = FB93FE9C28C611EF00BA5661 /* CryptoAlgorithmEd25519.hpp */; };
+		FB93FE9F28C611EF00BA5661 /* CryptoAlgorithmEd25519.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB93FE9D28C611EF00BA5661 /* CryptoAlgorithmEd25519.cpp */; };
 		FBB0C5B817BBD629003D3677 /* CSSFilterImageValue.h in Headers */ = {isa = PBXBuildFile; fileRef = FB965B8117BBB5F900E835B9 /* CSSFilterImageValue.h */; settings = {ATTRIBUTES = (); }; };
 		FBD6AF8815EF25C9008B7110 /* CSSBasicShapes.h in Headers */ = {isa = PBXBuildFile; fileRef = FBD6AF8715EF21D4008B7110 /* CSSBasicShapes.h */; };
 		FBD6AF8A15EF25DF008B7110 /* BasicShapeFunctions.h in Headers */ = {isa = PBXBuildFile; fileRef = FBD6AF8515EF21D4008B7110 /* BasicShapeFunctions.h */; };
@@ -10585,7 +10587,6 @@
 		574F55E2204F3CBF002948C6 /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
 		5750A9721E68D00000705C4A /* CryptoKeyEC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CryptoKeyEC.cpp; sourceTree = "<group>"; };
 		5750A9731E68D00000705C4A /* CryptoKeyEC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CryptoKeyEC.h; sourceTree = "<group>"; };
-		5750A97A1E69161600705C4A /* CryptoKeyECMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CryptoKeyECMac.cpp; sourceTree = "<group>"; };
 		5750A97C1E6A12B400705C4A /* EcKeyParams.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = EcKeyParams.idl; sourceTree = "<group>"; };
 		5750A97D1E6A13EF00705C4A /* CryptoAlgorithmEcKeyParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmEcKeyParams.h; sourceTree = "<group>"; };
 		5750A97F1E6A150800705C4A /* JSEcKeyParams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSEcKeyParams.cpp; sourceTree = "<group>"; };
@@ -18371,6 +18372,8 @@
 		FB484F4A171F821E00040755 /* TransformFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TransformFunctions.cpp; sourceTree = "<group>"; };
 		FB484F4B171F821E00040755 /* TransformFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformFunctions.h; sourceTree = "<group>"; };
 		FB92DF4915FED08700994433 /* PathOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PathOperation.h; sourceTree = "<group>"; };
+		FB93FE9C28C611EF00BA5661 /* CryptoAlgorithmEd25519.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CryptoAlgorithmEd25519.hpp; sourceTree = "<group>"; };
+		FB93FE9D28C611EF00BA5661 /* CryptoAlgorithmEd25519.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CryptoAlgorithmEd25519.cpp; sourceTree = "<group>"; };
 		FB965B8117BBB5F900E835B9 /* CSSFilterImageValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSSFilterImageValue.h; sourceTree = "<group>"; };
 		FB965B8217BBB62C00E835B9 /* CSSFilterImageValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSSFilterImageValue.cpp; sourceTree = "<group>"; };
 		FBD6AF8215EF21A3008B7110 /* BasicShapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicShapes.cpp; sourceTree = "<group>"; };
@@ -31519,7 +31522,6 @@
 				E1233F0E185A4130008DFAF5 /* CryptoAlgorithmRSAES_PKCS1_v1_5Mac.cpp */,
 				E1C266D618317AB4003F8B33 /* CryptoAlgorithmRSASSA_PKCS1_v1_5Mac.cpp */,
 				5721A9861ECE53B10081295A /* CryptoDigestAlgorithm.h */,
-				5750A97A1E69161600705C4A /* CryptoKeyECMac.cpp */,
 				E19AC3F8182566F700349426 /* CryptoKeyMac.cpp */,
 				E164FAA418315E1A00DB4E61 /* CryptoKeyRSAMac.cpp */,
 				419D9307255E842800DA1984 /* CryptoUtilitiesCocoa.cpp */,
@@ -31546,6 +31548,8 @@
 				5750A9851E6A216800705C4A /* CryptoAlgorithmECDH.h */,
 				57EEAA441E9ED2DD00701124 /* CryptoAlgorithmECDSA.cpp */,
 				57EEAA451E9ED2DD00701124 /* CryptoAlgorithmECDSA.h */,
+				FB93FE9D28C611EF00BA5661 /* CryptoAlgorithmEd25519.cpp */,
+				FB93FE9C28C611EF00BA5661 /* CryptoAlgorithmEd25519.hpp */,
 				57957CA61E971DE0008072AB /* CryptoAlgorithmHKDF.cpp */,
 				57957CA71E971DE0008072AB /* CryptoAlgorithmHKDF.h */,
 				E125F82F1822F11B00D84CD9 /* CryptoAlgorithmHMAC.cpp */,
@@ -34713,6 +34717,7 @@
 				57EEAA471E9ED2DD00701124 /* CryptoAlgorithmECDSA.h in Headers */,
 				57EEAA501E9FFBFC00701124 /* CryptoAlgorithmEcdsaParams.h in Headers */,
 				5750A97E1E6A13EF00705C4A /* CryptoAlgorithmEcKeyParams.h in Headers */,
+				FB93FE9E28C611EF00BA5661 /* CryptoAlgorithmEd25519.hpp in Headers */,
 				57957CA91E971DE0008072AB /* CryptoAlgorithmHKDF.h in Headers */,
 				57957CB21E972645008072AB /* CryptoAlgorithmHkdfParams.h in Headers */,
 				E125F8321822F11B00D84CD9 /* CryptoAlgorithmHMAC.h in Headers */,
@@ -39532,6 +39537,7 @@
 				5150B5DF27CDF499004FC81E /* CMUtilities.mm in Sources */,
 				A14090FB1AA51E1D0091191A /* ContentFilterUnblockHandlerCocoa.mm in Sources */,
 				46C696CC1E7205FC00597937 /* CPUMonitor.cpp in Sources */,
+				FB93FE9F28C611EF00BA5661 /* CryptoAlgorithmEd25519.cpp in Sources */,
 				1ABA76CA11D20E50004C201C /* CSSPropertyNames.cpp in Sources */,
 				2D22830323A8470700364B7E /* CursorMac.mm in Sources */,
 				5CBD59592280E926002B22AA /* CustomHeaderFields.cpp in Sources */,
