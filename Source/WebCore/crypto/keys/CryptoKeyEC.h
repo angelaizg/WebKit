@@ -66,6 +66,7 @@ public:
         P256,
         P384,
         P521,
+        Curve25519,
     };
 
     static Ref<CryptoKeyEC> create(CryptoAlgorithmIdentifier identifier, NamedCurve curve, CryptoKeyType type, PlatformECKeyContainer&& platformKey, bool extractable, CryptoKeyUsageBitmap usages)
