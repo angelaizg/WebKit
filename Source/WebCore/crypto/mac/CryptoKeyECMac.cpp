@@ -32,6 +32,7 @@
 #include "JsonWebKey.h"
 #include <wtf/text/Base64.h>
 
+#include <corecrypto/ccec25519.h>
 namespace WebCore {
 
 static const unsigned char InitialOctetEC = 0x04; // Per Section 2.3.3 of http://www.secg.org/sec1-v2.pdf
@@ -64,6 +65,9 @@ static constexpr size_t keySizeInBitsFromNamedCurve(CryptoKeyEC::NamedCurve curv
         return 384;
     case CryptoKeyEC::NamedCurve::P521:
         return 521;
+    case CryptoKeyEC::NamedCurve::Curve25519:
+        return 256;
+    
     }
 
     ASSERT_NOT_REACHED();
@@ -96,16 +100,23 @@ size_t CryptoKeyEC::keySizeInBits() const
 
 bool CryptoKeyEC::platformSupportedCurve(NamedCurve curve)
 {
-    return curve == NamedCurve::P256 || curve == NamedCurve::P384 || curve == NamedCurve::P521;
+    return curve == NamedCurve::P256 || curve == NamedCurve::P384 || curve == NamedCurve::P521 || curve == NamedCurve::Curve25519;
 }
 
 std::optional<CryptoKeyPair> CryptoKeyEC::platformGeneratePair(CryptoAlgorithmIdentifier identifier, NamedCurve curve, bool extractable, CryptoKeyUsageBitmap usages)
 {
     size_t size = keySizeInBitsFromNamedCurve(curve);
-    CCECCryptorRef ccPublicKey = nullptr;
-    CCECCryptorRef ccPrivateKey = nullptr;
-    if (CCECCryptorGeneratePair(size, &ccPublicKey, &ccPrivateKey))
-        return std::nullopt;
+    if (curve != NamedCurve::Curve25519){
+        CCECCryptorRef ccPublicKey = nullptr;
+        CCECCryptorRef ccPrivateKey = nullptr;
+        if (CCECCryptorGeneratePair(size, &ccPublicKey, &ccPrivateKey))
+            return std::nullopt;
+    } else {
+        ccec25519secretkey;
+        typedef ccec25519key ccec25519pubkey;
+        typedef ccec25519key ccec25519base;
+        
+    }
 
     auto publicKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), true, usages);
     auto privateKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Private, PlatformECKeyContainer(ccPrivateKey), extractable, usages);
@@ -116,11 +127,17 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportRaw(CryptoAlgorithmIdentifier ide
 {
     if (!doesUncompressedPointMatchNamedCurve(curve, keyData.size()))
         return nullptr;
-
-    CCECCryptorRef ccPublicKey = nullptr;
-    if (CCECCryptorImportKey(kCCImportKeyBinary, keyData.data(), keyData.size(), ccECKeyPublic, &ccPublicKey))
-        return nullptr;
-
+    if (curve != NamedCurve::Curve25519){
+        CCECCryptorRef ccPublicKey = nullptr;
+        if (CCECCryptorImportKey(kCCImportKeyBinary, keyData.data(), keyData.size(), ccECKeyPublic, &ccPublicKey))
+            return nullptr;
+    } else {
+        
+        
+        
+        
+        
+    }
     return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
 }
 
