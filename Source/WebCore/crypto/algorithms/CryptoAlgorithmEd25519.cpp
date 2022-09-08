@@ -29,19 +29,16 @@ CryptoAlgorithmIdentifier CryptoAlgorithmEd25519::identifier() const
     return s_identifier;
 }
 
-void CryptoAlgorithmEd25519::generateKey()
-{   /*
-     
-     void CryptoAlgorithmECDH::generateKey(const CryptoAlgorithmParameters& parameters, bool extractable, CryptoKeyUsageBitmap usages, KeyOrKeyPairCallback&& callback, ExceptionCallback&& exceptionCallback, ScriptExecutionContext&)
-     {
+void CryptoAlgorithmEd25519::generateKey(const CryptoAlgorithmParameters& parameters, bool extractable, CryptoKeyUsageBitmap usages, KeyOrKeyPairCallback&& callback, ExceptionCallback&& exceptionCallback, ScriptExecutionContext&)
+{
     const auto& ecParameters = downcast<CryptoAlgorithmEcKeyParams>(parameters);
-
+    
     if (usages & (CryptoKeyUsageEncrypt | CryptoKeyUsageDecrypt | CryptoKeyUsageDeriveKey | CryptoKeyUsageDeriveBits | CryptoKeyUsageWrapKey | CryptoKeyUsageUnwrapKey)) {
         exceptionCallback(SyntaxError);
         return;
     }
-
-    auto result = CryptoKeyEC::generatePair(CryptoAlgorithmIdentifier::ECDSA, ecParameters.namedCurve, extractable, usages);
+    
+    auto result = CryptoKeyEC::generatePair(CryptoAlgorithmIdentifier::Ed25519, ecParameters.namedCurve, extractable, usages);
     if (result.hasException()) {
         exceptionCallback(result.releaseException().code());
         return;
@@ -50,20 +47,14 @@ void CryptoAlgorithmEd25519::generateKey()
     auto pair = result.releaseReturnValue();
     pair.publicKey->setUsagesBitmap(pair.publicKey->usagesBitmap() & CryptoKeyUsageVerify);
     pair.privateKey->setUsagesBitmap(pair.privateKey->usagesBitmap() & CryptoKeyUsageSign);
-    callback(WTFMove(pair));*/
-    struct ccrng_state rng;
-    ccec25519secretkey sk;
-    ccec25519pubkey pk;
-    cccurve25519_make_key_pair( &rng,  pk,  sk);
-    callback(WTFMove((pk,sk)));
-    
+    callback(WTFMove(pair));
 }
 /*void cced25519_sign(const struct ccdigest_info *di,
  ccec25519signature sig,
  size_t len,
  const void *cc_sized_by(len) msg,
  const ccec25519pubkey pk,
- const ccec25519secretkey sk);*/
+ const ccec25519secretkey sk);*//*
 void CryptoAlgorithmEd25519::sign(const CryptoAlgorithmParameters& parameters, Ref<CryptoKey>&& key, Vector<uint8_t>&& data, VectorCallback&& callback, ExceptionCallback&& exceptionCallback, ScriptExecutionContext& context, WorkQueue& workQueue)
 {
     if (key->type() != CryptoKeyType::Private) {
@@ -75,7 +66,7 @@ void CryptoAlgorithmEd25519::sign(const CryptoAlgorithmParameters& parameters, R
         [parameters = crossThreadCopy(downcast<CryptoAlgorithmEcdsaParams>(parameters)), key = WTFMove(key), data = WTFMove(data)] {
             return platformSign(parameters, downcast<CryptoKeyEC>(key.get()), data);
         });
-}
+}*/
 /*
 void CryptoAlgorithmEd25519::verify(const CryptoAlgorithmParameters& parameters, Ref<CryptoKey>&& key, Vector<uint8_t>&& signature, Vector<uint8_t>&& data, BoolCallback&& callback, ExceptionCallback&& exceptionCallback, ScriptExecutionContext& context, WorkQueue& workQueue)
 {

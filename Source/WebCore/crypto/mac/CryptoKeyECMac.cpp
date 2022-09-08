@@ -33,6 +33,8 @@
 #include <wtf/text/Base64.h>
 
 #include <corecrypto/ccec25519.h>
+#include <stdlib.h>     /* srand, rand */
+  
 namespace WebCore {
 
 static const unsigned char InitialOctetEC = 0x04; // Per Section 2.3.3 of http://www.secg.org/sec1-v2.pdf
@@ -44,6 +46,7 @@ static constexpr unsigned char Secp256r1[] = {0x06, 0x08, 0x2a, 0x86, 0x48, 0xce
 static constexpr unsigned char Secp384r1[] = {0x06, 0x05, 0x2b, 0x81, 0x04, 0x00, 0x22};
 // OID secp521r1 1.3.132.0.35
 static constexpr unsigned char Secp521r1[] = {0x06, 0x05, 0x2b, 0x81, 0x04, 0x00, 0x23};
+static constexpr unsigned char curveEd25519[] = {0x06, 0x09, 0x2b, 0x06, 0x01, 0x04, 0x01, 0xda, 0x47, 0x0f,0x01};
 
 // Version 1. Per https://tools.ietf.org/html/rfc5915#section-3
 static const unsigned char PrivateKeyVersion[] = {0x02, 0x01, 0x01};
@@ -94,8 +97,17 @@ static constexpr bool doesFieldElementMatchNamedCurve(CryptoKeyEC::NamedCurve cu
 
 size_t CryptoKeyEC::keySizeInBits() const
 {
-    int result = CCECGetKeySize(m_platformKey.get());
-    return result ? result : 0;
+    //if it is either one or another
+    if (m_platformKey.index() == 0){
+        int result = CCECGetKeySize(m_platformKey.get());
+        return result ? result : 0;
+    
+    } else {
+        return 256;
+    }
+   
+    
+    
 }
 
 bool CryptoKeyEC::platformSupportedCurve(NamedCurve curve)
@@ -111,15 +123,18 @@ std::optional<CryptoKeyPair> CryptoKeyEC::platformGeneratePair(CryptoAlgorithmId
         CCECCryptorRef ccPrivateKey = nullptr;
         if (CCECCryptorGeneratePair(size, &ccPublicKey, &ccPrivateKey))
             return std::nullopt;
+        auto publicKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), true, usages);
+        auto privateKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Private, PlatformECKeyContainer(ccPrivateKey), extractable, usages);
+        
     } else {
         ccec25519secretkey;
-        typedef ccec25519key ccec25519pubkey;
-        typedef ccec25519key ccec25519base;
+        ccec25519pubkey publicKey;
+        ccec25519secretkey privateKey;
+        cccurve25519_make_key_pair(&rand(),publicKey,privateKey);
         
     }
 
-    auto publicKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), true, usages);
-    auto privateKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Private, PlatformECKeyContainer(ccPrivateKey), extractable, usages);
+    
     return CryptoKeyPair { WTFMove(publicKey), WTFMove(privateKey) };
 }
 
@@ -127,17 +142,10 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportRaw(CryptoAlgorithmIdentifier ide
 {
     if (!doesUncompressedPointMatchNamedCurve(curve, keyData.size()))
         return nullptr;
-    if (curve != NamedCurve::Curve25519){
-        CCECCryptorRef ccPublicKey = nullptr;
-        if (CCECCryptorImportKey(kCCImportKeyBinary, keyData.data(), keyData.size(), ccECKeyPublic, &ccPublicKey))
-            return nullptr;
-    } else {
-        
-        
-        
-        
-        
-    }
+    CCECCryptorRef ccPublicKey = nullptr;
+    if (CCECCryptorImportKey(kCCImportKeyBinary, keyData.data(), keyData.size(), ccECKeyPublic, &ccPublicKey))
+        return nullptr;
+  
     return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
 }
 
@@ -230,6 +238,10 @@ static size_t getOID(CryptoKeyEC::NamedCurve curve, const uint8_t*& oid)
     case CryptoKeyEC::NamedCurve::P521:
         oid = Secp521r1;
         oidSize = sizeof(Secp521r1);
+        break;
+    case CryptoKeyEC::NamedCurve::P521:
+        oid = curveEd25519;
+        oidSize = sizeof(curveEd25519);
         break;
     }
     return oidSize;

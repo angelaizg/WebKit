@@ -33,6 +33,8 @@
 
 #if OS(DARWIN) && !PLATFORM(GTK)
 #include "CommonCryptoUtilities.h"
+#include <corecrypto/ccec25519.h>
+
 
 typedef CCECCryptorRef PlatformECKey;
 namespace WebCore {
@@ -40,7 +42,11 @@ struct CCECCryptorRefDeleter {
     void operator()(CCECCryptorRef key) const { CCECCryptorRelease(key); }
 };
 }
+/*
 typedef std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter> PlatformECKeyContainer;
+ */
+
+typedef std::variant<std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>, ccec25519key> PlatformECKeyContainer;
 #endif
 
 #if USE(GCRYPT)
