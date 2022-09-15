@@ -31,8 +31,11 @@
 #include "CommonCryptoDERUtilities.h"
 #include "JsonWebKey.h"
 #include <wtf/text/Base64.h>
-
+extern "C" {
 #include <corecrypto/ccec25519.h>
+#include <corecrypto/ccrng.h>
+}
+//#include <CCRegression/test/testmore.h>
 #include <stdlib.h>     /* srand, rand */
   
 namespace WebCore {
@@ -98,16 +101,15 @@ static constexpr bool doesFieldElementMatchNamedCurve(CryptoKeyEC::NamedCurve cu
 size_t CryptoKeyEC::keySizeInBits() const
 {
     //if it is either one or another
-    if (m_platformKey.index() == 0){
-        int result = CCECGetKeySize(m_platformKey.get());
-        return result ? result : 0;
+    return WTF::switchOn( m_platformKey, [&](const std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>& options) ->int{
+            return CCECGetKeySize( options.get());
     
-    } else {
-        return 256;
-    }
-   
-    
-    
+        },
+        [](const Vector<uint8_t>& options) -> int{
+        return options.size();
+    });
+                         
+                         
 }
 
 bool CryptoKeyEC::platformSupportedCurve(NamedCurve curve)
@@ -117,36 +119,55 @@ bool CryptoKeyEC::platformSupportedCurve(NamedCurve curve)
 
 std::optional<CryptoKeyPair> CryptoKeyEC::platformGeneratePair(CryptoAlgorithmIdentifier identifier, NamedCurve curve, bool extractable, CryptoKeyUsageBitmap usages)
 {
+    
     size_t size = keySizeInBitsFromNamedCurve(curve);
     if (curve != NamedCurve::Curve25519){
         CCECCryptorRef ccPublicKey = nullptr;
         CCECCryptorRef ccPrivateKey = nullptr;
         if (CCECCryptorGeneratePair(size, &ccPublicKey, &ccPrivateKey))
             return std::nullopt;
-        auto publicKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), true, usages);
-        auto privateKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Private, PlatformECKeyContainer(ccPrivateKey), extractable, usages);
+        auto publicKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Public, std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>(ccPublicKey), true, usages);
+        auto privateKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Private, std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>(ccPrivateKey), extractable, usages);
+        return CryptoKeyPair { WTFMove(publicKey), WTFMove(privateKey) };
         
     } else {
-        ccec25519secretkey;
-        ccec25519pubkey publicKey;
-        ccec25519secretkey privateKey;
-        cccurve25519_make_key_pair(&rand(),publicKey,privateKey);
+        
+        ccec25519pubkey ccPublicKey;
+        ccec25519secretkey ccPrivateKey;
+        
+        int cc_error = 0;
+        //struct ccrng_state *rng = global_test_rng;'
+        cccurve25519_make_key_pair(ccrng(&cc_error),ccPublicKey,ccPrivateKey);
+        //cccurve25519_make_key_pair(rng,ccPublicKey,ccPrivateKey);
+        auto publicKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Public, Vector<uint8_t>(ccPublicKey), true, usages);
+        auto privateKey = CryptoKeyEC::create(identifier, curve, CryptoKeyType::Private, Vector<uint8_t>(ccPrivateKey), extractable, usages);
+        return CryptoKeyPair { WTFMove(publicKey), WTFMove(privateKey) };
         
     }
-
-    
-    return CryptoKeyPair { WTFMove(publicKey), WTFMove(privateKey) };
 }
 
 RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportRaw(CryptoAlgorithmIdentifier identifier, NamedCurve curve, Vector<uint8_t>&& keyData, bool extractable, CryptoKeyUsageBitmap usages)
 {
-    if (!doesUncompressedPointMatchNamedCurve(curve, keyData.size()))
-        return nullptr;
-    CCECCryptorRef ccPublicKey = nullptr;
-    if (CCECCryptorImportKey(kCCImportKeyBinary, keyData.data(), keyData.size(), ccECKeyPublic, &ccPublicKey))
-        return nullptr;
-  
-    return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
+        if (!doesUncompressedPointMatchNamedCurve(curve, keyData.size()))
+            return nullptr;
+    
+        if (curve != NamedCurve::Curve25519){
+            CCECCryptorRef ccPublicKey = nullptr;
+            if (CCECCryptorImportKey(kCCImportKeyBinary, keyData.data(), keyData.size(), ccECKeyPublic, &ccPublicKey))
+                return nullptr;
+            return create(identifier, curve, CryptoKeyType::Public, std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>(ccPublicKey), extractable, usages);
+        } else{
+            //ccec25519pubkey ccPublicKey;
+        //probably at least verify it's the right size and put it in PlatformECKeyContainer
+            /*if ( keyData.size()!= ccECKeyPublic.size())
+                return nullptr;
+            */
+            
+            return create(identifier, curve, CryptoKeyType::Public, Vector<uint8_t>(ccECKeyPublic), extractable, usages);
+        }
+           
+    
+        
 }
 
 Vector<uint8_t> CryptoKeyEC::platformExportRaw() const
@@ -154,9 +175,20 @@ Vector<uint8_t> CryptoKeyEC::platformExportRaw() const
     size_t expectedSize = 2 * keySizeInBytes() + 1; // Per Section 2.3.4 of http://www.secg.org/sec1-v2.pdf
     Vector<uint8_t> result(expectedSize);
     size_t size = result.size();
-    if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary, result.data(), &size, ccECKeyPublic, m_platformKey.get()) || size != expectedSize))
-        return { };
-    return result;
+    
+
+    return WTF::switchOn( m_platformKey, [&result,&size,&expectedSize](const std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>& options) -> Vector<uint8_t>{
+            if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary, result.data(), &size, ccECKeyPublic, options.get()) || size != expectedSize))
+                return { };
+            return result;
+    
+        },
+        [&size,&result](const Vector<uint8_t>& options) -> Vector<uint8_t>{
+            if(options.size() != size)
+                return { };
+            return result;
+    });
+   
 }
 
 RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportJWKPublic(CryptoAlgorithmIdentifier identifier, NamedCurve curve, Vector<uint8_t>&& x, Vector<uint8_t>&& y, bool extractable, CryptoKeyUsageBitmap usages)
@@ -169,7 +201,7 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportJWKPublic(CryptoAlgorithmIdentifi
     if (CCECCryptorCreateFromData(size, x.data(), x.size(), y.data(), y.size(), &ccPublicKey))
         return nullptr;
 
-    return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
+    return create(identifier, curve, CryptoKeyType::Public, std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>(ccPublicKey), extractable, usages);
 }
 
 RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportJWKPrivate(CryptoAlgorithmIdentifier identifier, NamedCurve curve, Vector<uint8_t>&& x, Vector<uint8_t>&& y, Vector<uint8_t>&& d, bool extractable, CryptoKeyUsageBitmap usages)
@@ -189,7 +221,7 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportJWKPrivate(CryptoAlgorithmIdentif
     if (CCECCryptorImportKey(kCCImportKeyBinary, binaryInput.data(), binaryInput.size(), ccECKeyPrivate, &ccPrivateKey))
         return nullptr;
 
-    return create(identifier, curve, CryptoKeyType::Private, PlatformECKeyContainer(ccPrivateKey), extractable, usages);
+    return create(identifier, curve, CryptoKeyType::Private, std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>(ccPrivateKey), extractable, usages);
 }
 
 bool CryptoKeyEC::platformAddFieldElements(JsonWebKey& jwk) const
@@ -200,27 +232,43 @@ bool CryptoKeyEC::platformAddFieldElements(JsonWebKey& jwk) const
 
     Vector<uint8_t> result(privateKeySize);
     size_t size = result.size();
-    switch (type()) {
-    case CryptoKeyType::Public:
-        if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary, result.data(), &size, ccECKeyPublic, m_platformKey.get())))
+    
+    
+    return WTF::switchOn( m_platformKey, [&result,&size,this,&publicKeySize,&privateKeySize,&jwk,&keySizeInBytes](const std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>& options)mutable -> bool {
+        
+        switch (type()) {
+            case CryptoKeyType::Public:
+                if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary, result.data(), &size, ccECKeyPublic, options.get())))
+                    return false;
+                break;
+            case CryptoKeyType::Private:
+                if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary, result.data(), &size, ccECKeyPrivate, options.get())))
+                    return false;
+                break;
+            default:
+                ASSERT_NOT_REACHED();
+                return false;
+        }
+        
+        if (UNLIKELY((size != publicKeySize) && (size != privateKeySize)))
             return false;
-        break;
-    case CryptoKeyType::Private:
-        if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary, result.data(), &size, ccECKeyPrivate, m_platformKey.get())))
-            return false;
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-        return false;
-    }
+        jwk.x = base64URLEncodeToString(result.data() + 1, keySizeInBytes);
+        jwk.y = base64URLEncodeToString(result.data() + keySizeInBytes + 1, keySizeInBytes);
+        if (size > publicKeySize)
+            jwk.d = base64URLEncodeToString(result.data() + publicKeySize, keySizeInBytes);
+        return true;
+        
+        
+    },[&](const Vector<uint8_t>&options) -> bool{
+        //auxiliar operation consider what to do in this case
+        return options.size()>0;
 
-    if (UNLIKELY((size != publicKeySize) && (size != privateKeySize)))
-        return false;
-    jwk.x = base64URLEncodeToString(result.data() + 1, keySizeInBytes);
-    jwk.y = base64URLEncodeToString(result.data() + keySizeInBytes + 1, keySizeInBytes);
-    if (size > publicKeySize)
-        jwk.d = base64URLEncodeToString(result.data() + publicKeySize, keySizeInBytes);
-    return true;
+    });
+    
+    return true ;
+    
+   
+   
 }
 
 static size_t getOID(CryptoKeyEC::NamedCurve curve, const uint8_t*& oid)
@@ -239,7 +287,7 @@ static size_t getOID(CryptoKeyEC::NamedCurve curve, const uint8_t*& oid)
         oid = Secp521r1;
         oidSize = sizeof(Secp521r1);
         break;
-    case CryptoKeyEC::NamedCurve::P521:
+    case CryptoKeyEC::NamedCurve::Curve25519:
         oid = curveEd25519;
         oidSize = sizeof(curveEd25519);
         break;
@@ -290,7 +338,7 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportSpki(CryptoAlgorithmIdentifier id
         if ( CCECCryptorImportKey(kCCImportKeyBinary, keyData.data() + index, keyData.size() - index, ccECKeyPublic, &ccPublicKey))
               return nullptr;
     }
-    return create(identifier, curve, CryptoKeyType::Public, PlatformECKeyContainer(ccPublicKey), extractable, usages);
+    return create(identifier, curve, CryptoKeyType::Public, std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>(ccPublicKey), extractable, usages);
 }
 
 Vector<uint8_t> CryptoKeyEC::platformExportSpki() const
@@ -298,32 +346,38 @@ Vector<uint8_t> CryptoKeyEC::platformExportSpki() const
     size_t expectedKeySize = 2 * keySizeInBytes() + 1; // Per Section 2.3.4 of http://www.secg.org/sec1-v2.pdf
     Vector<uint8_t> keyBytes(expectedKeySize);
     size_t keySize = keyBytes.size();
-    if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary, keyBytes.data(), &keySize, ccECKeyPublic, m_platformKey.get()) || keySize != expectedKeySize))
-        return { };
-
-    // The following addes SPKI header to a raw EC public key.
-    // Once the underlying crypto library is updated to output SPKI EC Key, we should remove this hack.
-    // <rdar://problem/30987628>
-    const uint8_t* oid;
-    size_t oidSize = getOID(namedCurve(), oid);
-
-    // SEQUENCE + length(1) + OID id-ecPublicKey + OID secp256r1/OID secp384r1/OID secp521r1 + BIT STRING + length(?) + InitialOctet + Key size
-    size_t totalSize = sizeof(IdEcPublicKey) + oidSize + bytesNeededForEncodedLength(keySize + 1) + keySize + 4;
-
     Vector<uint8_t> result;
-    result.reserveInitialCapacity(totalSize + bytesNeededForEncodedLength(totalSize) + 1);
-    result.append(SequenceMark);
-    addEncodedASN1Length(result, totalSize);
-    result.append(SequenceMark);
-    addEncodedASN1Length(result, sizeof(IdEcPublicKey) + oidSize);
-    result.append(IdEcPublicKey, sizeof(IdEcPublicKey));
-    result.append(oid, oidSize);
-    result.append(BitStringMark);
-    addEncodedASN1Length(result, keySize + 1);
-    result.append(InitialOctet);
-    result.append(keyBytes.data(), keyBytes.size());
+    auto keyBytes_data = keyBytes.data();
+    return WTF::switchOn( m_platformKey, [&](const std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>& options) mutable->Vector<uint8_t>{
+        if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary,keyBytes_data , &keySize, ccECKeyPublic, options.get()) || keySize != expectedKeySize))
+            return { };
+        // The following addes SPKI header to a raw EC public key.
+        // Once the underlying crypto library is updated to output SPKI EC Key, we should remove this hack.
+        // <rdar://problem/30987628>
+        const uint8_t* oid;
+        size_t oidSize = getOID(namedCurve(), oid);
 
-    return result;
+        // SEQUENCE + length(1) + OID id-ecPublicKey + OID secp256r1/OID secp384r1/OID secp521r1 + BIT STRING + length(?) + InitialOctet + Key size
+        size_t totalSize = sizeof(IdEcPublicKey) + oidSize + bytesNeededForEncodedLength(keySize + 1) + keySize + 4;
+
+       
+        result.reserveInitialCapacity(totalSize + bytesNeededForEncodedLength(totalSize) + 1);
+        result.append(SequenceMark);
+        addEncodedASN1Length(result, totalSize);
+        result.append(SequenceMark);
+        addEncodedASN1Length(result, sizeof(IdEcPublicKey) + oidSize);
+        result.append(IdEcPublicKey, sizeof(IdEcPublicKey));
+        result.append(oid, oidSize);
+        result.append(BitStringMark);
+        addEncodedASN1Length(result, keySize + 1);
+        result.append(InitialOctet);
+        result.append(keyBytes.data(), keyBytes.size());
+        return result ;
+    },[&](const Vector<uint8_t>&options) -> Vector<uint8_t> {
+        //auxiliar operation consider what to do in this case
+        return options;
+
+    });
 }
 
 // Per https://www.ietf.org/rfc/rfc5208.txt
@@ -387,7 +441,7 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportPkcs8(CryptoAlgorithmIdentifier i
     if (CCECCryptorImportKey(kCCImportKeyBinary, keyBinary.data(), keyBinary.size(), ccECKeyPrivate, &ccPrivateKey))
         return nullptr;
 
-    return create(identifier, curve, CryptoKeyType::Private, PlatformECKeyContainer(ccPrivateKey), extractable, usages);
+    return create(identifier, curve, CryptoKeyType::Private, std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>(ccPrivateKey), extractable, usages);
 }
 
 Vector<uint8_t> CryptoKeyEC::platformExportPkcs8() const
@@ -396,51 +450,61 @@ Vector<uint8_t> CryptoKeyEC::platformExportPkcs8() const
     size_t expectedKeySize = keySizeInBytes * 3 + 1; // 04 + X + Y + D
     Vector<uint8_t> keyBytes(expectedKeySize);
     size_t keySize = keyBytes.size();
-    if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary, keyBytes.data(), &keySize, ccECKeyPrivate, m_platformKey.get()) || keySize != expectedKeySize))
-        return { };
+    Vector<uint8_t> result;
+    return WTF::switchOn( m_platformKey, [&](const std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>& options) mutable ->Vector<uint8_t>{
+        
+        if (UNLIKELY(CCECCryptorExportKey(kCCImportKeyBinary, keyBytes.data(), &keySize, ccECKeyPrivate, options.get()) || keySize != expectedKeySize))
+            return { };
+        
+        const uint8_t* oid;
+        size_t oidSize = getOID(namedCurve(), oid);
 
+        // InitialOctet + 04 + X + Y
+        size_t publicKeySize = keySizeInBytes * 2 + 2;
+        // BIT STRING + length(?) + publicKeySize
+        size_t taggedTypeSize = bytesNeededForEncodedLength(publicKeySize) + publicKeySize + 1;
+        // VERSION + OCTET STRING + length(1) + private key + TaggedType1(1) + length(?) + BIT STRING + length(?) + publicKeySize
+        size_t ecPrivateKeySize = sizeof(Version) + keySizeInBytes + bytesNeededForEncodedLength(taggedTypeSize) + bytesNeededForEncodedLength(publicKeySize) + publicKeySize + 4;
+        // SEQUENCE + length(?) + ecPrivateKeySize
+        size_t privateKeySize = bytesNeededForEncodedLength(ecPrivateKeySize) + ecPrivateKeySize + 1;
+        // VERSION + SEQUENCE + length(1) + OID id-ecPublicKey + OID secp256r1/OID secp384r1/OID secp521r1 + OCTET STRING + length(?) + privateKeySize
+        size_t totalSize = sizeof(Version) + sizeof(IdEcPublicKey) + oidSize + bytesNeededForEncodedLength(privateKeySize) + privateKeySize + 3;
+
+        
+        result.reserveInitialCapacity(totalSize + bytesNeededForEncodedLength(totalSize) + 1);
+        result.append(SequenceMark);
+        addEncodedASN1Length(result, totalSize);
+        result.append(Version, sizeof(Version));
+        result.append(SequenceMark);
+        addEncodedASN1Length(result, sizeof(IdEcPublicKey) + oidSize);
+        result.append(IdEcPublicKey, sizeof(IdEcPublicKey));
+        result.append(oid, oidSize);
+        result.append(OctetStringMark);
+        addEncodedASN1Length(result, privateKeySize);
+        result.append(SequenceMark);
+        addEncodedASN1Length(result, ecPrivateKeySize);
+        result.append(PrivateKeyVersion, sizeof(PrivateKeyVersion));
+        result.append(OctetStringMark);
+        addEncodedASN1Length(result, keySizeInBytes);
+        result.append(keyBytes.data() + publicKeySize - 1, keySizeInBytes);
+        result.append(TaggedType1);
+        addEncodedASN1Length(result, taggedTypeSize);
+        result.append(BitStringMark);
+        addEncodedASN1Length(result, publicKeySize);
+        result.append(InitialOctet);
+        result.append(keyBytes.data(), publicKeySize - 1);
+
+        return result;
+    },[&](const Vector<uint8_t>&options) -> Vector<uint8_t> {
+        //auxiliar operation consider what to do in this case
+        return options;
+
+    });
+    
     // The following addes PKCS8 header to a raw EC private key.
     // Once the underlying crypto library is updated to output PKCS8 EC Key, we should remove this hack.
     // <rdar://problem/30987628>
-    const uint8_t* oid;
-    size_t oidSize = getOID(namedCurve(), oid);
-
-    // InitialOctet + 04 + X + Y
-    size_t publicKeySize = keySizeInBytes * 2 + 2;
-    // BIT STRING + length(?) + publicKeySize
-    size_t taggedTypeSize = bytesNeededForEncodedLength(publicKeySize) + publicKeySize + 1;
-    // VERSION + OCTET STRING + length(1) + private key + TaggedType1(1) + length(?) + BIT STRING + length(?) + publicKeySize
-    size_t ecPrivateKeySize = sizeof(Version) + keySizeInBytes + bytesNeededForEncodedLength(taggedTypeSize) + bytesNeededForEncodedLength(publicKeySize) + publicKeySize + 4;
-    // SEQUENCE + length(?) + ecPrivateKeySize
-    size_t privateKeySize = bytesNeededForEncodedLength(ecPrivateKeySize) + ecPrivateKeySize + 1;
-    // VERSION + SEQUENCE + length(1) + OID id-ecPublicKey + OID secp256r1/OID secp384r1/OID secp521r1 + OCTET STRING + length(?) + privateKeySize
-    size_t totalSize = sizeof(Version) + sizeof(IdEcPublicKey) + oidSize + bytesNeededForEncodedLength(privateKeySize) + privateKeySize + 3;
-
-    Vector<uint8_t> result;
-    result.reserveInitialCapacity(totalSize + bytesNeededForEncodedLength(totalSize) + 1);
-    result.append(SequenceMark);
-    addEncodedASN1Length(result, totalSize);
-    result.append(Version, sizeof(Version));
-    result.append(SequenceMark);
-    addEncodedASN1Length(result, sizeof(IdEcPublicKey) + oidSize);
-    result.append(IdEcPublicKey, sizeof(IdEcPublicKey));
-    result.append(oid, oidSize);
-    result.append(OctetStringMark);
-    addEncodedASN1Length(result, privateKeySize);
-    result.append(SequenceMark);
-    addEncodedASN1Length(result, ecPrivateKeySize);
-    result.append(PrivateKeyVersion, sizeof(PrivateKeyVersion));
-    result.append(OctetStringMark);
-    addEncodedASN1Length(result, keySizeInBytes);
-    result.append(keyBytes.data() + publicKeySize - 1, keySizeInBytes);
-    result.append(TaggedType1);
-    addEncodedASN1Length(result, taggedTypeSize);
-    result.append(BitStringMark);
-    addEncodedASN1Length(result, publicKeySize);
-    result.append(InitialOctet);
-    result.append(keyBytes.data(), publicKeySize - 1);
-
-    return result;
+    
 }
 
 } // namespace WebCore

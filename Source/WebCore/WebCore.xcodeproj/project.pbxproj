@@ -1,4 +1,4 @@
-// !$*UTF8*$!
+ƒ// !$*UTF8*$!
 {
 	archiveVersion = 1;
 	classes = {
@@ -5722,6 +5722,7 @@
 		FB2C15C3165D649D0039C9F8 /* CachedSVGDocumentReference.h in Headers */ = {isa = PBXBuildFile; fileRef = FB2C15C2165D64900039C9F8 /* CachedSVGDocumentReference.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		FB3056C2169E5DAC0096A232 /* CSSGroupingRule.h in Headers */ = {isa = PBXBuildFile; fileRef = FB3056C1169E5DAC0096A232 /* CSSGroupingRule.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		FB484F4D171F821E00040755 /* TransformFunctions.h in Headers */ = {isa = PBXBuildFile; fileRef = FB484F4B171F821E00040755 /* TransformFunctions.h */; };
+		FB6816EF28D27D310004E98B /* WebCore.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 1CDD45E50BA9C84600F90147 /* WebCore.xcconfig */; };
 		FB92DF4B15FED08700994433 /* PathOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = FB92DF4915FED08700994433 /* PathOperation.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		FB93FE9E28C611EF00BA5661 /* CryptoAlgorithmEd25519.hpp in Headers */ = {isa = PBXBuildFile; fileRef = FB93FE9C28C611EF00BA5661 /* CryptoAlgorithmEd25519.hpp */; };
 		FB93FE9F28C611EF00BA5661 /* CryptoAlgorithmEd25519.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB93FE9D28C611EF00BA5661 /* CryptoAlgorithmEd25519.cpp */; };
@@ -18371,9 +18372,13 @@
 		FB3056C1169E5DAC0096A232 /* CSSGroupingRule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSSGroupingRule.h; sourceTree = "<group>"; };
 		FB484F4A171F821E00040755 /* TransformFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TransformFunctions.cpp; sourceTree = "<group>"; };
 		FB484F4B171F821E00040755 /* TransformFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformFunctions.h; sourceTree = "<group>"; };
+		FB6816EA28D1F7AA0004E98B /* CryptoAlgorithmEd25519Mac.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CryptoAlgorithmEd25519Mac.cpp; sourceTree = "<group>"; };
 		FB92DF4915FED08700994433 /* PathOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PathOperation.h; sourceTree = "<group>"; };
 		FB93FE9C28C611EF00BA5661 /* CryptoAlgorithmEd25519.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CryptoAlgorithmEd25519.hpp; sourceTree = "<group>"; };
 		FB93FE9D28C611EF00BA5661 /* CryptoAlgorithmEd25519.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CryptoAlgorithmEd25519.cpp; sourceTree = "<group>"; };
+		FB93FEB728CB87BA00BA5661 /* CryptoAlgorithmCurve25519Params.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmCurve25519Params.h; sourceTree = "<group>"; };
+		FB93FEB828CB8F8600BA5661 /* CryptoAlgorithmEd25519Params.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmEd25519Params.h; sourceTree = "<group>"; };
+		FB93FEBF28CFA7EA00BA5661 /* Ed25519Params.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = Ed25519Params.idl; sourceTree = "<group>"; };
 		FB965B8117BBB5F900E835B9 /* CSSFilterImageValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSSFilterImageValue.h; sourceTree = "<group>"; };
 		FB965B8217BBB62C00E835B9 /* CSSFilterImageValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSSFilterImageValue.cpp; sourceTree = "<group>"; };
 		FBD6AF8215EF21A3008B7110 /* BasicShapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicShapes.cpp; sourceTree = "<group>"; };
@@ -31513,6 +31518,7 @@
 				E1FE137C184D270200892F13 /* CryptoAlgorithmAES_KWMac.cpp */,
 				576814341E6FE3E800E77754 /* CryptoAlgorithmECDHMac.cpp */,
 				57EEAA481E9F2D3200701124 /* CryptoAlgorithmECDSAMac.cpp */,
+				FB6816EA28D1F7AA0004E98B /* CryptoAlgorithmEd25519Mac.cpp */,
 				57957CAA1E97247B008072AB /* CryptoAlgorithmHKDFMac.cpp */,
 				E125F8371822F1EB00D84CD9 /* CryptoAlgorithmHMACMac.cpp */,
 				57E657E81E714D1A00F941CA /* CryptoAlgorithmPBKDF2Mac.cpp */,
@@ -31620,9 +31626,11 @@
 				57E1E5A61E8DBD3E00EE37C9 /* CryptoAlgorithmAesCtrParams.h */,
 				57B5F8081E5D1A9800F34F90 /* CryptoAlgorithmAesGcmParams.h */,
 				577483111DADC55D00716EF9 /* CryptoAlgorithmAesKeyParams.h */,
+				FB93FEB728CB87BA00BA5661 /* CryptoAlgorithmCurve25519Params.h */,
 				576814291E6F99C100E77754 /* CryptoAlgorithmEcdhKeyDeriveParams.h */,
 				57EEAA4D1E9FFBFC00701124 /* CryptoAlgorithmEcdsaParams.h */,
 				5750A97D1E6A13EF00705C4A /* CryptoAlgorithmEcKeyParams.h */,
+				FB93FEB828CB8F8600BA5661 /* CryptoAlgorithmEd25519Params.h */,
 				57957CAF1E972645008072AB /* CryptoAlgorithmHkdfParams.h */,
 				577483181DB4491F00716EF9 /* CryptoAlgorithmHmacKeyParams.h */,
 				57E657EB1E7162EA00F941CA /* CryptoAlgorithmPbkdf2Params.h */,
@@ -31634,6 +31642,7 @@
 				576814281E6F98AD00E77754 /* EcdhKeyDeriveParams.idl */,
 				57EEAA4E1E9FFBFC00701124 /* EcdsaParams.idl */,
 				5750A97C1E6A12B400705C4A /* EcKeyParams.idl */,
+				FB93FEBF28CFA7EA00BA5661 /* Ed25519Params.idl */,
 				57957CB01E972645008072AB /* HkdfParams.idl */,
 				577483171DB1FE8900716EF9 /* HmacKeyParams.idl */,
 				57E657EA1E715F0500F941CA /* Pbkdf2Params.idl */,
@@ -39189,6 +39198,7 @@
 				A11E8C091B1E29070003A7C7 /* northWestSouthEastResizeCursor.png in Resources */,
 				93153BDC141959BC00FCF5BE /* textAreaResizeCorner.png in Resources */,
 				9370918D1416D86B00477333 /* textAreaResizeCorner@2x.png in Resources */,
+				FB6816EF28D27D310004E98B /* WebCore.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

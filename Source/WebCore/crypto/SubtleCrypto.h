@@ -35,7 +35,9 @@
 #include <wtf/RefCounted.h>
 #include <wtf/WeakPtr.h>
 #include <wtf/WorkQueue.h>
-
+extern "C" {
+#include <corecrypto/ccec25519.h>
+}
 namespace JSC {
 class ArrayBufferView;
 class ArrayBuffer;

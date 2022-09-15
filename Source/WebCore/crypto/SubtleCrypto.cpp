@@ -51,7 +51,14 @@
 #include "JSRsaKeyGenParams.h"
 #include "JSRsaOaepParams.h"
 #include "JSRsaPssParams.h"
+#include "JSEd25519Params.h"
 #include <JavaScriptCore/JSONObject.h>
+#include "CryptoAlgorithmEd25519Params.h"
+
+extern "C" {
+#include <corecrypto/ccec25519.h>
+}
+
 
 namespace WebCore {
 using namespace JSC;
@@ -163,6 +170,14 @@ static ExceptionOr<std::unique_ptr<CryptoAlgorithmParameters>> normalizeCryptoAl
             result = makeUnique<CryptoAlgorithmEcdsaParams>(params);
             break;
         }
+        
+        case  CryptoAlgorithmIdentifier::Ed25519:{
+            auto params = convertDictionary<CryptoAlgorithmEd25519Params>(state, value.get());
+            RETURN_IF_EXCEPTION(scope, Exception { ExistingExceptionError });
+            result = makeUnique<CryptoAlgorithmEd25519Params>(params);
+            break;
+         
+        }
         case CryptoAlgorithmIdentifier::RSA_PSS: {
             auto params = convertDictionary<CryptoAlgorithmRsaPssParams>(state, value.get());
             RETURN_IF_EXCEPTION(scope, Exception { ExistingExceptionError });
@@ -194,6 +209,7 @@ static ExceptionOr<std::unique_ptr<CryptoAlgorithmParameters>> normalizeCryptoAl
             result = makeUnique<CryptoAlgorithmRsaKeyGenParams>(params);
             break;
         }
+        
         case CryptoAlgorithmIdentifier::RSASSA_PKCS1_v1_5:
         case CryptoAlgorithmIdentifier::RSA_PSS:
         case CryptoAlgorithmIdentifier::RSA_OAEP: {
@@ -233,6 +249,15 @@ static ExceptionOr<std::unique_ptr<CryptoAlgorithmParameters>> normalizeCryptoAl
             result = makeUnique<CryptoAlgorithmEcKeyParams>(params);
             break;
         }
+        
+        case  CryptoAlgorithmIdentifier::Ed25519:{
+            auto params = convertDictionary<CryptoAlgorithmEd25519Params>(state, value.get());
+            RETURN_IF_EXCEPTION(scope, Exception { ExistingExceptionError });
+            result = makeUnique<CryptoAlgorithmEd25519Params>(params);
+            break;
+        
+        }
+        
         default:
             return Exception { NotSupportedError };
         }
@@ -252,6 +277,7 @@ static ExceptionOr<std::unique_ptr<CryptoAlgorithmParameters>> normalizeCryptoAl
             result = makeUnique<CryptoAlgorithmEcdhKeyDeriveParams>(params);
             break;
         }
+                
         case CryptoAlgorithmIdentifier::HKDF: {
             auto params = convertDictionary<CryptoAlgorithmHkdfParams>(state, value.get());
             RETURN_IF_EXCEPTION(scope, Exception { ExistingExceptionError });
@@ -317,6 +343,14 @@ static ExceptionOr<std::unique_ptr<CryptoAlgorithmParameters>> normalizeCryptoAl
             result = makeUnique<CryptoAlgorithmEcKeyParams>(params);
             break;
         }
+        
+        case  CryptoAlgorithmIdentifier::Ed25519:{
+            auto params = convertDictionary<CryptoAlgorithmEd25519Params>(state, value.get());
+            RETURN_IF_EXCEPTION(scope, Exception { ExistingExceptionError });
+            result = makeUnique<CryptoAlgorithmEd25519Params>(params);
+            break;
+        }
+        
         case CryptoAlgorithmIdentifier::HKDF:
         case CryptoAlgorithmIdentifier::PBKDF2:
             result = makeUnique<CryptoAlgorithmParameters>(params);
@@ -497,6 +531,7 @@ static bool isSupportedExportKey(CryptoAlgorithmIdentifier identifier)
     case CryptoAlgorithmIdentifier::HMAC:
     case CryptoAlgorithmIdentifier::ECDSA:
     case CryptoAlgorithmIdentifier::ECDH:
+    case  CryptoAlgorithmIdentifier::Ed25519:
         return true;
     default:
         return false;
@@ -520,6 +555,7 @@ static std::unique_ptr<CryptoAlgorithmParameters> crossThreadCopyImportParams(co
     }
     case CryptoAlgorithmParameters::Class::EcKeyParams:
         return makeUnique<CryptoAlgorithmEcKeyParams>(crossThreadCopy(downcast<CryptoAlgorithmEcKeyParams>(importParams)));
+            
     case CryptoAlgorithmParameters::Class::HmacKeyParams:
         return makeUnique<CryptoAlgorithmHmacKeyParams>(crossThreadCopy(downcast<CryptoAlgorithmHmacKeyParams>(importParams)));
     case CryptoAlgorithmParameters::Class::RsaHashedImportParams:

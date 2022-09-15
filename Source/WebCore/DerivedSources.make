@@ -777,6 +777,7 @@ JS_BINDING_IDLS := \
     $(WebCore)/crypto/parameters/EcKeyParams.idl \
     $(WebCore)/crypto/parameters/EcdhKeyDeriveParams.idl \
     $(WebCore)/crypto/parameters/EcdsaParams.idl \
+	$(WebCore)/crypto/parameters/Ed25519Params.idl\
     $(WebCore)/crypto/parameters/HkdfParams.idl \
     $(WebCore)/crypto/parameters/HmacKeyParams.idl \
     $(WebCore)/crypto/parameters/Pbkdf2Params.idl \
@@ -785,6 +786,7 @@ JS_BINDING_IDLS := \
     $(WebCore)/crypto/parameters/RsaKeyGenParams.idl \
     $(WebCore)/crypto/parameters/RsaOaepParams.idl \
     $(WebCore)/crypto/parameters/RsaPssParams.idl \
+	$(WebCore)/crypto/parameters/Ed25519Params.idl \
     $(WebCore)/css/CSSConditionRule.idl \
     $(WebCore)/css/CSSContainerRule.idl \
     $(WebCore)/css/CSSCounterStyleRule.idl \

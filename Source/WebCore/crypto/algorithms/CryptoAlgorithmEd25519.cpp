@@ -14,8 +14,9 @@
 #include "CryptoKeyEC.h"
 #include <JavaScriptCore/JSCJSValueInlines.h>
 #include <wtf/CrossThreadCopier.h>
+extern "C" {
 #include <corecrypto/ccec25519.h>
-
+}
 
 namespace WebCore {
 
@@ -101,10 +102,6 @@ void CryptoAlgorithmEd25519::importKey(CryptoKeyFormat format, KeyData&& data, c
             exceptionCallback(DataError);
             return;
         }
-
-
-       
-
         result = CryptoKeyEC::importJwk(ecParameters.identifier, ecParameters.namedCurve, WTFMove(key), extractable, usages);
         break;
     }
