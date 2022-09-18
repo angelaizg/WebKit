@@ -45,7 +45,7 @@ class Worker;
 class RTCRtpScriptTransform final
     : public ThreadSafeRefCounted<RTCRtpScriptTransform, WTF::DestructionThread::Main>
     , public ActiveDOMObject
-    , public EventTarget {
+    , public EventTargetWithInlineData {
     WTF_MAKE_ISO_ALLOCATED(RTCRtpScriptTransform);
 public:
     static ExceptionOr<Ref<RTCRtpScriptTransform>> create(JSC::JSGlobalObject&, Worker&, JSC::JSValue, Vector<JSC::Strong<JSC::JSObject>>&&);

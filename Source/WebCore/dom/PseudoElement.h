@@ -50,7 +50,7 @@ private:
 
     PseudoId customPseudoId() const override { return m_pseudoId; }
 
-    WeakPtr<Element, WeakPtrImplWithEventTargetData> m_hostElement;
+    WeakPtr<Element> m_hostElement;
     PseudoId m_pseudoId;
 };
 

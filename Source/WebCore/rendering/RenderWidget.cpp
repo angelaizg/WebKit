@@ -24,7 +24,6 @@
 #include "RenderWidget.h"
 
 #include "AXObjectCache.h"
-#include "BackgroundPainter.h"
 #include "DocumentInlines.h"
 #include "FloatRoundedRect.h"
 #include "Frame.h"
@@ -323,7 +322,7 @@ void RenderWidget::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         paintInfo.context().save();
         FloatRoundedRect roundedInnerRect = FloatRoundedRect(style().getRoundedInnerBorderFor(borderRect,
             paddingTop() + borderTop(), paddingBottom() + borderBottom(), paddingLeft() + borderLeft(), paddingRight() + borderRight(), true, true));
-        BackgroundPainter::clipRoundedInnerRect(paintInfo.context(), borderRect, roundedInnerRect);
+        clipRoundedInnerRect(paintInfo.context(), borderRect, roundedInnerRect);
     }
 
     if (m_widget)

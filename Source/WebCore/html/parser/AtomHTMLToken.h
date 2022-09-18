@@ -29,7 +29,6 @@
 #include "HTMLNameCache.h"
 #include "HTMLNames.h"
 #include "HTMLToken.h"
-#include "TagName.h"
 #include <wtf/HashSet.h>
 #include <wtf/text/AtomStringHash.h>
 
@@ -40,8 +39,7 @@ public:
     using Type = HTMLToken::Type;
 
     explicit AtomHTMLToken(HTMLToken&);
-    AtomHTMLToken(Type, TagName, const AtomString& name, Vector<Attribute>&& = { }); // Only StartTag or EndTag.
-    AtomHTMLToken(Type, TagName, Vector<Attribute>&& = { }); // Only StartTag or EndTag.
+    AtomHTMLToken(Type, const AtomString& name, Vector<Attribute>&& = { }); // Only StartTag or EndTag.
 
     AtomHTMLToken(const AtomHTMLToken&) = delete;
     AtomHTMLToken(AtomHTMLToken&&) = default;
@@ -50,7 +48,7 @@ public:
 
     // StartTag, EndTag, DOCTYPE.
 
-    void setTagName(TagName);
+    void setName(const AtomString&);
 
     const AtomString& name() const;
 
@@ -64,7 +62,6 @@ public:
 
     Vector<Attribute>& attributes();
 
-    TagName tagName() const;
     bool selfClosing() const;
     const Vector<Attribute>& attributes() const;
 
@@ -94,7 +91,6 @@ private:
     Span<const UChar> m_externalCharacters; // Character
 
     Type m_type;
-    TagName m_tagName; // StartTag, EndTag.
     bool m_externalCharactersIsAll8BitData; // Character
     bool m_selfClosing { false }; // StartTag, EndTag.
     bool m_hasDuplicateAttribute { false };
@@ -111,25 +107,13 @@ inline auto AtomHTMLToken::type() const -> Type
 inline const AtomString& AtomHTMLToken::name() const
 {
     ASSERT(m_type == Type::StartTag || m_type == Type::EndTag || m_type == Type::DOCTYPE);
-    if (!m_name.isNull())
-        return m_name;
-
-    ASSERT(m_type == Type::StartTag || m_type == Type::EndTag);
-    ASSERT(m_tagName != TagName::Unknown);
-    return tagNameAsString(m_tagName);
+    return m_name;
 }
 
-inline void AtomHTMLToken::setTagName(TagName tagName)
+inline void AtomHTMLToken::setName(const AtomString& name)
 {
-    ASSERT(m_type == Type::StartTag || m_type == Type::EndTag);
-    ASSERT(tagName != TagName::Unknown);
-    m_tagName = tagName;
-}
-
-inline TagName AtomHTMLToken::tagName() const
-{
-    ASSERT(m_type == Type::StartTag || m_type == Type::EndTag);
-    return m_tagName;
+    ASSERT(m_type == Type::StartTag || m_type == Type::EndTag || m_type == Type::DOCTYPE);
+    m_name = name;
 }
 
 inline bool AtomHTMLToken::selfClosing() const
@@ -254,8 +238,8 @@ inline AtomHTMLToken::AtomHTMLToken(HTMLToken& token)
     case Type::StartTag:
     case Type::EndTag:
         m_selfClosing = token.selfClosing();
-        m_tagName = findTagName(token.name());
-        if (UNLIKELY(m_tagName == TagName::Unknown))
+        m_name = HTMLNames::findHTMLTag(token.name());
+        if (UNLIKELY(m_name.isNull()))
             m_name = AtomString(token.name().data(), token.name().size());
         initializeAttributes(token.attributes());
         return;
@@ -273,23 +257,12 @@ inline AtomHTMLToken::AtomHTMLToken(HTMLToken& token)
     ASSERT_NOT_REACHED();
 }
 
-inline AtomHTMLToken::AtomHTMLToken(HTMLToken::Type type, TagName tagName, const AtomString& name, Vector<Attribute>&& attributes)
+inline AtomHTMLToken::AtomHTMLToken(HTMLToken::Type type, const AtomString& name, Vector<Attribute>&& attributes)
     : m_name(name)
     , m_attributes(WTFMove(attributes))
     , m_type(type)
-    , m_tagName(tagName)
 {
     ASSERT(type == Type::StartTag || type == Type::EndTag);
-    ASSERT(findTagName(name) == tagName);
-}
-
-inline AtomHTMLToken::AtomHTMLToken(HTMLToken::Type type, TagName tagName, Vector<Attribute>&& attributes)
-    : m_attributes(WTFMove(attributes))
-    , m_type(type)
-    , m_tagName(tagName)
-{
-    ASSERT(type == Type::StartTag || type == Type::EndTag);
-    ASSERT(tagName != TagName::Unknown);
 }
 
 } // namespace WebCore

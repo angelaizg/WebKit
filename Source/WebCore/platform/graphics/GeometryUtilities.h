@@ -98,8 +98,6 @@ std::array<FloatPoint, 4> verticesForBox(const FloatRect&, const FloatPoint);
 float toPositiveAngle(float angle);
 float toRelatedAcuteAngle(float angle);
 
-float normalizeAngleInRadians(float radians);
-
 struct RotatedRect {
     FloatPoint center;
     FloatSize size;

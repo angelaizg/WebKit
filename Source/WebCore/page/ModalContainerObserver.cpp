@@ -451,7 +451,7 @@ public:
     Document* document() const { return m_document.get(); }
 
 private:
-    WeakPtr<Document, WeakPtrImplWithEventTargetData> m_document;
+    WeakPtr<Document> m_document;
     bool m_continueHidingModalContainerAfterScope { false };
 };
 
@@ -500,13 +500,13 @@ void ModalContainerObserver::collectClickableElementsTimerFired()
                 return;
 
             struct ClassifiedControls {
-                Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>> positive;
-                Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>> neutral;
-                Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>> negative;
+                Vector<WeakPtr<HTMLElement>> positive;
+                Vector<WeakPtr<HTMLElement>> neutral;
+                Vector<WeakPtr<HTMLElement>> negative;
 
                 HTMLElement* controlToClick(ModalContainerDecision decision) const
                 {
-                    auto matchNonNull = [&](const WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>& element) {
+                    auto matchNonNull = [&](const WeakPtr<HTMLElement>& element) {
                         return !!element;
                     };
 
@@ -711,7 +711,7 @@ void ModalContainerObserver::revealModalContainer()
         element->invalidateStyle();
 }
 
-std::pair<Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>>, Vector<String>> ModalContainerObserver::collectClickableElements()
+std::pair<Vector<WeakPtr<HTMLElement>>, Vector<String>> ModalContainerObserver::collectClickableElements()
 {
     Ref container = *this->container();
     m_collectingClickableElements = true;
@@ -748,7 +748,7 @@ std::pair<Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>>, Vector<S
     removeElementsWithEmptyBounds(clickableControls);
     removeParentOrChildElements(clickableControls);
 
-    Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>> classifiableControls;
+    Vector<WeakPtr<HTMLElement>> classifiableControls;
     Vector<String> controlTextsToClassify;
     classifiableControls.reserveInitialCapacity(clickableControls.size());
     controlTextsToClassify.reserveInitialCapacity(clickableControls.size());

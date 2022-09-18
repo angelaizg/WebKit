@@ -51,7 +51,6 @@ class ResourceLoader;
 class ResourceRequest;
 class ResourceResponse;
 class SubstituteData;
-class WeakPtrImplWithEventTargetData;
 
 class ApplicationCacheHost {
     WTF_MAKE_NONCOPYABLE(ApplicationCacheHost); WTF_MAKE_FAST_ALLOCATED;
@@ -150,7 +149,7 @@ private:
     ApplicationCache* mainResourceApplicationCache() const { return m_mainResourceApplicationCache.get(); }
     bool maybeLoadFallbackForMainError(const ResourceRequest&, const ResourceError&);
 
-    WeakPtr<DOMApplicationCache, WeakPtrImplWithEventTargetData> m_domApplicationCache;
+    WeakPtr<DOMApplicationCache> m_domApplicationCache;
     DocumentLoader& m_documentLoader;
 
     bool m_defersEvents { true }; // Events are deferred until after document onload.

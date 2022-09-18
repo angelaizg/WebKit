@@ -152,11 +152,7 @@ void CaptionUserPreferences::setUserPrefersSubtitles(bool preference)
 bool CaptionUserPreferences::userPrefersTextDescriptions() const
 {
     auto* page = currentPage();
-    if (!page)
-        return false;
-
-    auto& settings = page->settings();
-    return settings.shouldDisplayTextDescriptions() && (settings.audioDescriptionsEnabled() || settings.extendedAudioDescriptionsEnabled());
+    return page && page->settings().audioDescriptionsEnabled() && page->settings().shouldDisplayTextDescriptions();
 }
 
 void CaptionUserPreferences::setUserPrefersTextDescriptions(bool preference)

@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "CachedImage.h"
 #include "LayoutBox.h"
 #include "LayoutSize.h"
@@ -71,3 +73,4 @@ private:
 
 SPECIALIZE_TYPE_TRAITS_LAYOUT_BOX(ReplacedBox, isReplacedBox())
 
+#endif

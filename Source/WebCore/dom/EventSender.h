@@ -32,9 +32,8 @@
 namespace WebCore {
 
 class Page;
-class WeakPtrImplWithEventTargetData;
 
-template<typename T, typename Counter> class EventSender {
+template<typename T> class EventSender {
     WTF_MAKE_NONCOPYABLE(EventSender); WTF_MAKE_FAST_ALLOCATED;
 public:
     explicit EventSender(const AtomString& eventType);
@@ -56,24 +55,24 @@ private:
 
     AtomString m_eventType;
     Timer m_timer;
-    Vector<WeakPtr<T, Counter>> m_dispatchSoonList;
-    Vector<WeakPtr<T, Counter>> m_dispatchingList;
+    Vector<WeakPtr<T>> m_dispatchSoonList;
+    Vector<WeakPtr<T>> m_dispatchingList;
 };
 
-template<typename T, typename Counter> EventSender<T, Counter>::EventSender(const AtomString& eventType)
+template<typename T> EventSender<T>::EventSender(const AtomString& eventType)
     : m_eventType(eventType)
     , m_timer(*this, &EventSender::timerFired)
 {
 }
 
-template<typename T, typename Counter> void EventSender<T, Counter>::dispatchEventSoon(T& sender)
+template<typename T> void EventSender<T>::dispatchEventSoon(T& sender)
 {
     m_dispatchSoonList.append(sender);
     if (!m_timer.isActive())
         m_timer.startOneShot(0_s);
 }
 
-template<typename T, typename Counter> void EventSender<T, Counter>::cancelEvent(T& sender)
+template<typename T> void EventSender<T>::cancelEvent(T& sender)
 {
     // Remove instances of this sender from both lists.
     // Use loops because we allow multiple instances to get into the lists.
@@ -87,7 +86,7 @@ template<typename T, typename Counter> void EventSender<T, Counter>::cancelEvent
     }
 }
 
-template<typename T, typename Counter> void EventSender<T, Counter>::dispatchPendingEvents(Page* page)
+template<typename T> void EventSender<T>::dispatchPendingEvents(Page* page)
 {
     // Need to avoid re-entering this function; if new dispatches are
     // scheduled before the parent finishes processing the list, they

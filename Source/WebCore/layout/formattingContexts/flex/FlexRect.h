@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutRect.h"
 
 namespace WebCore {
@@ -253,3 +255,4 @@ inline FlexRect::operator LayoutRect() const
 
 }
 }
+#endif

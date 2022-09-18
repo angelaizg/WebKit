@@ -83,7 +83,7 @@ std::optional<bool> DocumentStorageAccess::hasStorageAccessQuickCheck()
         return true;
 
     auto& securityOrigin = m_document.securityOrigin();
-    if (!frame || securityOrigin.isOpaque())
+    if (!frame || securityOrigin.isUnique())
         return false;
 
     if (frame->isMainFrame())
@@ -153,7 +153,7 @@ std::optional<StorageAccessQuickResult> DocumentStorageAccess::requestStorageAcc
         return StorageAccessQuickResult::Grant;
 
     auto& securityOrigin = m_document.securityOrigin();
-    if (!frame || securityOrigin.isOpaque() || !isAllowedToRequestStorageAccess())
+    if (!frame || securityOrigin.isUnique() || !isAllowedToRequestStorageAccess())
         return StorageAccessQuickResult::Reject;
 
     if (frame->isMainFrame())

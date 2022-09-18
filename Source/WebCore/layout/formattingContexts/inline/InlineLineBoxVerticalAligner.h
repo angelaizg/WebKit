@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineFormattingContext.h"
 #include "InlineFormattingGeometry.h"
 
@@ -63,3 +65,4 @@ private:
 }
 }
 
+#endif

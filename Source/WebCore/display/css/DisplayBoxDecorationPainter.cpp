@@ -26,6 +26,8 @@
 #include "config.h"
 #include "DisplayBoxDecorationPainter.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "BorderEdge.h" // For BoxSideSet.
 #include "Color.h"
 #include "DisplayBoxDecorationData.h"
@@ -1552,3 +1554,4 @@ void BoxDecorationPainter::paintBackgroundAndBorders(PaintingContext& paintingCo
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

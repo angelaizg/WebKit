@@ -383,7 +383,6 @@ namespace WebCore {
     macro(StorageManager) \
     macro(StorageManagerFileSystemAccess) \
     macro(SubtleCrypto) \
-    macro(TestReportBody) \
     macro(TextDecoderStream) \
     macro(TextDecoderStreamDecoder) \
     macro(TextEncoderStream) \

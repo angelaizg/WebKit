@@ -29,7 +29,6 @@
 #include "config.h"
 #include "AccessibilityTable.h"
 
-#include "AXLogger.h"
 #include "AXObjectCache.h"
 #include "AccessibilityTableCell.h"
 #include "AccessibilityTableColumn.h"
@@ -71,22 +70,24 @@ Ref<AccessibilityTable> AccessibilityTable::create(RenderObject* renderer)
     return adoptRef(*new AccessibilityTable(renderer));
 }
 
-bool AccessibilityTable::hasNonTableARIARole() const
+bool AccessibilityTable::hasARIARole() const
 {
-    switch (ariaRoleAttribute()) {
-    case AccessibilityRole::Unknown: // No role attribute specified.
-    case AccessibilityRole::Table:
-    case AccessibilityRole::Grid:
-    case AccessibilityRole::TreeGrid:
+    if (!m_renderer)
         return false;
-    default:
+    
+    AccessibilityRole ariaRole = ariaRoleAttribute();
+    if (ariaRole != AccessibilityRole::Unknown)
         return true;
-    }
+
+    return false;
 }
 
 bool AccessibilityTable::isExposable() const
 {
-    return m_renderer && m_isExposable;
+    if (!m_renderer)
+        return false;
+    
+    return m_isExposable;
 }
 
 HTMLTableElement* AccessibilityTable::tableElement() const
@@ -106,14 +107,14 @@ HTMLTableElement* AccessibilityTable::tableElement() const
     // FIXME: This might find an unrelated parent table element.
     return ancestorsOfType<HTMLTableElement>(*(firstChild->node())).first();
 }
-
+    
 bool AccessibilityTable::isDataTable() const
 {
     if (!m_renderer)
         return false;
 
-    // Do not consider it a data table if it has a non-table ARIA role.
-    if (hasNonTableARIARole())
+    // Do not consider it a data table is it has an ARIA role.
+    if (hasARIARole())
         return false;
 
     // When a section of the document is contentEditable, all tables should be
@@ -342,7 +343,7 @@ bool AccessibilityTable::isDataTable() const
     
     return false;
 }
-
+    
 bool AccessibilityTable::computeIsTableExposableThroughAccessibility() const
 {
     // The following is a heuristic used to determine if a
@@ -352,8 +353,10 @@ bool AccessibilityTable::computeIsTableExposableThroughAccessibility() const
     if (!m_renderer)
         return false;
 
-    // If it has a non-table ARIA role, it shouldn't be exposed as a table.
-    if (hasNonTableARIARole())
+    // If the developer assigned an aria role to this, then we
+    // shouldn't expose it as a table, unless, of course, the aria
+    // role is a table.
+    if (hasARIARole())
         return false;
 
     return isDataTable();
@@ -666,7 +669,7 @@ AccessibilityRole AccessibilityTable::roleValue() const
 {
     if (!isExposable())
         return AccessibilityRenderObject::roleValue();
-
+    
     AccessibilityRole ariaRole = ariaRoleAttribute();
     if (ariaRole == AccessibilityRole::Grid || ariaRole == AccessibilityRole::TreeGrid)
         return ariaRole;

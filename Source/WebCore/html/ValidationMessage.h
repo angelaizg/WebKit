@@ -39,7 +39,6 @@
 
 namespace WebCore {
 
-class WeakPtrImplWithEventTargetData;
 class HTMLElement;
 class HTMLFormControlElement;
 class Node;
@@ -66,7 +65,7 @@ private:
     void buildBubbleTree();
     void deleteBubbleTree();
 
-    WeakPtr<HTMLFormControlElement, WeakPtrImplWithEventTargetData> m_element;
+    WeakPtr<HTMLFormControlElement> m_element;
     String m_message;
     std::unique_ptr<Timer> m_timer;
     RefPtr<HTMLElement> m_bubble;

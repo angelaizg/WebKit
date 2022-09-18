@@ -26,6 +26,8 @@
 #include "config.h"
 #include "LayoutTreeBuilder.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "CachedImage.h"
 #include "HTMLNames.h"
 #include "HTMLParserIdioms.h"
@@ -573,3 +575,4 @@ void printLayoutTreeForLiveDocuments()
 }
 }
 
+#endif

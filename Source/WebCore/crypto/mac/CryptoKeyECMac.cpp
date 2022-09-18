@@ -30,8 +30,12 @@
 
 #include "CommonCryptoDERUtilities.h"
 #include "JsonWebKey.h"
-#include <pal/spi/cocoa/CoreCryptoSPI.h>
 #include <wtf/text/Base64.h>
+extern "C" {
+#include <corecrypto/ccec25519.h>
+#include <corecrypto/ccrng.h>
+}
+//#include <CCRegression/test/testmore.h>
 #include <stdlib.h>     /* srand, rand */
   
 namespace WebCore {

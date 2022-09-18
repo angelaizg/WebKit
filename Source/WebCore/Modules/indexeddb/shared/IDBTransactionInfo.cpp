@@ -30,6 +30,10 @@
 
 namespace WebCore {
 
+IDBTransactionInfo::IDBTransactionInfo()
+{
+}
+
 IDBTransactionInfo::IDBTransactionInfo(const IDBResourceIdentifier& identifier)
     : m_identifier(identifier)
 {

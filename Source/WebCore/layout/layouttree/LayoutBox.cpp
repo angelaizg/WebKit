@@ -26,6 +26,8 @@
 #include "config.h"
 #include "LayoutBox.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutBoxGeometry.h"
 #include "LayoutContainerBox.h"
 #include "LayoutContainingBlockChainIterator.h"
@@ -188,26 +190,16 @@ bool Box::isFloatingPositioned() const
 
 bool Box::isLeftFloatingPositioned() const
 {
-    ASSERT(isBlockLevelBox());
     if (!isFloatingPositioned())
         return false;
-    auto inlineDirection = containingBlock().style().direction();
-    auto floatingValue = m_style.floating();
-    return floatingValue == Float::InlineStart
-        || (inlineDirection == TextDirection::LTR && floatingValue == Float::Left)
-        || (inlineDirection == TextDirection::RTL && floatingValue == Float::Right);
+    return m_style.floating() == Float::Left;
 }
 
 bool Box::isRightFloatingPositioned() const
 {
-    ASSERT(isBlockLevelBox());
     if (!isFloatingPositioned())
         return false;
-    auto inlineDirection = containingBlock().style().direction();
-    auto floatingValue = m_style.floating();
-    return floatingValue == Float::InlineEnd
-        || (inlineDirection == TextDirection::LTR && floatingValue == Float::Right)
-        || (inlineDirection == TextDirection::RTL && floatingValue == Float::Left);
+    return m_style.floating() == Float::Right;
 }
 
 bool Box::hasFloatClear() const
@@ -585,3 +577,4 @@ void Box::removeRareData()
 }
 }
 
+#endif

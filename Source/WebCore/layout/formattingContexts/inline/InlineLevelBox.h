@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FontCascade.h"
 #include "InlineRect.h"
 #include "LayoutBox.h"
@@ -246,3 +248,4 @@ inline InlineLevelBox InlineLevelBox::createGenericInlineLevelBox(const Box& lay
 }
 }
 
+#endif

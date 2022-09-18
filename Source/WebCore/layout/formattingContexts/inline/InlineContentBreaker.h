@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FormattingConstraints.h"
 #include "LayoutUnits.h"
 #include "RenderStyle.h"
@@ -189,3 +191,4 @@ inline bool InlineContentBreaker::ContinuousContent::isFullyCollapsible() const
 
 }
 }
+#endif

@@ -438,17 +438,17 @@ String FontCascade::normalizeSpaces(const UChar* characters, unsigned length)
     return normalizeSpacesInternal(characters, length);
 }
 
-static std::atomic<bool> shouldUseFontSmoothingForTesting = true;
+static bool shouldUseFontSmoothing = true;
 
-void FontCascade::setShouldUseSmoothingForTesting(bool shouldUseSmoothing)
+void FontCascade::setShouldUseSmoothing(bool shouldUseSmoothing)
 {
     ASSERT(isMainThread());
-    shouldUseFontSmoothingForTesting = shouldUseSmoothing;
+    shouldUseFontSmoothing = shouldUseSmoothing;
 }
 
-bool FontCascade::shouldUseSmoothingForTesting()
+bool FontCascade::shouldUseSmoothing()
 {
-    return shouldUseFontSmoothingForTesting;
+    return shouldUseFontSmoothing;
 }
 
 #if !USE(CORE_TEXT) || PLATFORM(WIN)

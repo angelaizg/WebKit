@@ -35,7 +35,7 @@ namespace WebCore {
 WTF_MAKE_ISO_ALLOCATED_IMPL(SVGTextPathElement);
 
 inline SVGTextPathElement::SVGTextPathElement(const QualifiedName& tagName, Document& document)
-    : SVGTextContentElement(tagName, document, makeUniqueRef<PropertyRegistry>(*this))
+    : SVGTextContentElement(tagName, document)
     , SVGURIReference(this)
 {
     ASSERT(hasTagName(SVGNames::textPathTag));

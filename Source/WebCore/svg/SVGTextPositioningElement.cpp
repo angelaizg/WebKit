@@ -38,8 +38,8 @@ namespace WebCore {
 
 WTF_MAKE_ISO_ALLOCATED_IMPL(SVGTextPositioningElement);
 
-SVGTextPositioningElement::SVGTextPositioningElement(const QualifiedName& tagName, Document& document, UniqueRef<SVGPropertyRegistry>&& propertyRegistry)
-    : SVGTextContentElement(tagName, document, WTFMove(propertyRegistry))
+SVGTextPositioningElement::SVGTextPositioningElement(const QualifiedName& tagName, Document& document)
+    : SVGTextContentElement(tagName, document)
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [] {

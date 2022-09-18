@@ -81,7 +81,6 @@
 #include "HitTestRequest.h"
 #include "HitTestResult.h"
 #include "HitTestingTransformState.h"
-#include "InspectorInstrumentation.h"
 #include "LegacyRenderSVGForeignObject.h"
 #include "LegacyRenderSVGRoot.h"
 #include "Logging.h"
@@ -1840,7 +1839,7 @@ TransformationMatrix RenderLayer::perspectiveTransform() const
 
     TransformationMatrix transform;
     style.unapplyTransformOrigin(transform, transformOrigin);
-    style.applyPerspective(transform, perspectiveOrigin);
+    style.applyPerspective(transform, renderer(), perspectiveOrigin);
     style.applyTransformOrigin(transform, transformOrigin);
     return transform;
 }
@@ -5457,21 +5456,16 @@ void RenderLayer::updateFiltersAfterStyleChange()
 
 void RenderLayer::updateLayerScrollableArea()
 {
-    bool hasScrollableArea = scrollableArea();
-    bool needsScrollableArea = is<RenderBox>(renderer()) && downcast<RenderBox>(renderer()).requiresLayerWithScrollableArea();
-
-    if (needsScrollableArea == hasScrollableArea)
-        return;
-
-    if (needsScrollableArea)
-        ensureLayerScrollableArea();
-    else {
+    if (!is<RenderBox>(renderer()) || !downcast<RenderBox>(renderer()).requiresLayerWithScrollableArea()) {
+        bool hadScrollableArea = scrollableArea();
         clearLayerScrollableArea();
-        if (renderer().settings().asyncOverflowScrollingEnabled())
+
+        if (hadScrollableArea && renderer().settings().asyncOverflowScrollingEnabled())
             setNeedsCompositingConfigurationUpdate();
+        return;
     }
 
-    InspectorInstrumentation::didAddOrRemoveScrollbars(m_renderer);
+    ensureLayerScrollableArea();
 }
 
 void RenderLayer::updateFilterPaintingStrategy()

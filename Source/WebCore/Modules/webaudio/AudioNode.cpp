@@ -698,7 +698,7 @@ BaseAudioContext& AudioNode::context()
 {
     return WTF::switchOn(m_context, [](Ref<BaseAudioContext>& context) -> BaseAudioContext& {
         return context.get();
-    }, [](WeakPtr<BaseAudioContext, WeakPtrImplWithEventTargetData>& context) -> BaseAudioContext& {
+    }, [](WeakPtr<BaseAudioContext>& context) -> BaseAudioContext& {
         return *context;
     });
 }
@@ -707,7 +707,7 @@ const BaseAudioContext& AudioNode::context() const
 {
     return WTF::switchOn(m_context, [](const Ref<BaseAudioContext>& context) -> const BaseAudioContext& {
         return context.get();
-    }, [](const WeakPtr<BaseAudioContext, WeakPtrImplWithEventTargetData>& context) -> const BaseAudioContext& {
+    }, [](const WeakPtr<BaseAudioContext>& context) -> const BaseAudioContext& {
         return *context;
     });
 }

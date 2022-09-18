@@ -121,7 +121,7 @@ size_t MessageEvent::memoryCost() const
     }, [] (const String& string) -> size_t {
         return string.sizeInBytes();
     }, [] (const Ref<Blob>& blob) -> size_t {
-        return blob->memoryCost();
+        return blob->size();
     }, [] (const Ref<ArrayBuffer>& buffer) -> size_t {
         return buffer->byteLength();
     });

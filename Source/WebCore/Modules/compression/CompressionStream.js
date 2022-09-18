@@ -32,9 +32,12 @@ function initializeCompressionStream(format)
     if (arguments.length < 1)
         @throwTypeError(errorMessage);
 
+    if (typeof arguments[0] !== "string")
+        @throwTypeError("CompressionStream input must be a string.");
+
     const algorithms = ['gzip', 'deflate', 'deflate-raw'];
-    const lowercaseFormat = @toString(arguments[0]).toLowerCase();
-    const findAlgorithm = (element) => element === lowercaseFormat;
+    const text = arguments[0].toLowerCase();
+    const findAlgorithm = (element) => element === text;
 
     // Pass the index to our new CompressionStreamEncoder, so we do not need to reparse the string.
     // We need to ensure that the Formats.h and this file stay in sync.

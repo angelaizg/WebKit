@@ -26,6 +26,8 @@
 #include "config.h"
 #include "TableFormattingQuirks.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutBox.h"
 #include "LayoutContainerBox.h"
 #include "LayoutContainingBlockChainIterator.h"
@@ -71,3 +73,4 @@ LayoutUnit TableFormattingQuirks::heightValueOfNearestContainingBlockWithFixedHe
 }
 }
 
+#endif

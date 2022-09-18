@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutSize.h"
 #include <wtf/IsoMalloc.h>
 
@@ -102,3 +104,4 @@ private:
 } // namespace WebCore
 
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

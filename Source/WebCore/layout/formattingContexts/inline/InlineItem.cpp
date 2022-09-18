@@ -28,6 +28,8 @@
 
 #include "InlineTextItem.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 namespace WebCore {
 namespace Layout {
 
@@ -47,3 +49,4 @@ static_assert(sizeof(InlineItem) == sizeof(SameSizeAsInlineItem));
 
 }
 }
+#endif

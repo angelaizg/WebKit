@@ -222,11 +222,7 @@ static bool forceUseGlyphDisplayListForTesting = false;
 
 bool TextPainter::shouldUseGlyphDisplayList(const PaintInfo& paintInfo)
 {
-#if USE(GLYPH_DISPLAY_LIST_CACHE)
     return !paintInfo.context().paintingDisabled() && paintInfo.enclosingSelfPaintingLayer() && (paintInfo.enclosingSelfPaintingLayer()->paintingFrequently() || forceUseGlyphDisplayListForTesting);
-#else
-    return !paintInfo.context().paintingDisabled() && paintInfo.enclosingSelfPaintingLayer() && forceUseGlyphDisplayListForTesting;
-#endif
 }
 
 void TextPainter::setForceUseGlyphDisplayListForTesting(bool enabled)
@@ -250,8 +246,10 @@ String TextPainter::cachedGlyphDisplayListsForTextNodeAsText(Text& textNode, Opt
         DisplayList::DisplayList* displayList = nullptr;
         if (auto* legacyInlineBox = textBox.legacyInlineBox())
             displayList = TextPainter::glyphDisplayListIfExists(*legacyInlineBox);
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
         else
             displayList = TextPainter::glyphDisplayListIfExists(*textBox.inlineBox());
+#endif
         if (displayList) {
             builder.append(displayList->asText(flags));
             builder.append('\n');

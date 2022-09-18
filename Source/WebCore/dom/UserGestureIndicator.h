@@ -37,7 +37,6 @@
 namespace WebCore {
 
 class Document;
-class WeakPtrImplWithEventTargetData;
 
 enum ProcessingUserGestureState {
     ProcessingUserGesture,
@@ -111,7 +110,7 @@ private:
     ProcessingUserGestureState m_state = NotProcessingUserGesture;
     Vector<Function<void(UserGestureToken&)>> m_destructionObservers;
     UserGestureType m_gestureType;
-    WeakHashSet<Document, WeakPtrImplWithEventTargetData> m_documentsImpactedByUserGesture;
+    WeakHashSet<Document> m_documentsImpactedByUserGesture;
     DOMPasteAccessPolicy m_domPasteAccessPolicy { DOMPasteAccessPolicy::NotRequestedYet };
     GestureScope m_scope { GestureScope::All };
     MonotonicTime m_startTime { MonotonicTime::now() };

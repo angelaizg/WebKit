@@ -167,7 +167,7 @@ Ref<MediaStreamTrackPrivate> MediaStreamTrackPrivate::clone()
     clonedMediaStreamTrackPrivate->m_contentHint = this->m_contentHint;
     clonedMediaStreamTrackPrivate->updateReadyState();
 
-    if (m_source->isProducingData())
+    if (isProducingData())
         clonedMediaStreamTrackPrivate->startProducingData();
 
     return clonedMediaStreamTrackPrivate;
@@ -240,15 +240,6 @@ void MediaStreamTrackPrivate::sourceSettingsChanged()
 
     forEachObserver([this](auto& observer) {
         observer.trackSettingsChanged(*this);
-    });
-}
-
-void MediaStreamTrackPrivate::sourceConfigurationChanged()
-{
-    ALWAYS_LOG(LOGIDENTIFIER);
-
-    forEachObserver([this](auto& observer) {
-        observer.trackConfigurationChanged(*this);
     });
 }
 

@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutUnit.h"
 #include <optional>
 
@@ -101,3 +103,4 @@ struct PrecomputedMarginBefore {
 
 }
 }
+#endif

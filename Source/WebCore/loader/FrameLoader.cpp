@@ -3036,8 +3036,8 @@ void FrameLoader::addHTTPOriginIfNeeded(ResourceRequest& request, const String& 
 
     if (origin.isEmpty()) {
         // If we don't know what origin header to attach, we attach the value
-        // for an opaque origin.
-        request.setHTTPOrigin(SecurityOrigin::createOpaque()->toString());
+        // for an empty origin.
+        request.setHTTPOrigin(SecurityOrigin::createUnique()->toString());
         return;
     }
 
@@ -3482,11 +3482,7 @@ void FrameLoader::executeJavaScriptURL(const URL& url, const NavigationAction& a
 {
     ASSERT(url.protocolIsJavaScript());
 
-    bool isFirstNavigationInFrame = false;
-    if (!m_stateMachine.committedFirstRealDocumentLoad()) {
-        m_stateMachine.advanceTo(FrameLoaderStateMachine::DisplayingInitialEmptyDocumentPostCommit);
-        isFirstNavigationInFrame = true;
-    }
+    bool isFirstNavigationInFrame = m_stateMachine.isDisplayingInitialEmptyDocument();
 
     RefPtr ownerDocument = m_frame.ownerElement() ? &m_frame.ownerElement()->document() : nullptr;
     if (ownerDocument)
@@ -3962,10 +3958,9 @@ void FrameLoader::loadItem(HistoryItem& item, HistoryItem* fromItem, FrameLoadTy
     // If we're continuing this history navigation in a new process, then doing a same document navigation never makes sense.
     ASSERT(!sameDocumentNavigation || shouldTreatAsContinuingLoad == ShouldTreatAsContinuingLoad::No);
 
-    if (sameDocumentNavigation) {
-        m_loadType = loadType;
+    if (sameDocumentNavigation)
         loadSameDocumentItem(item);
-    } else
+    else
         loadDifferentDocumentItem(item, fromItem, loadType, MayAttemptCacheOnlyLoadForFormSubmissionItem, shouldTreatAsContinuingLoad);
 }
 

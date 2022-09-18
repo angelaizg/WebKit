@@ -52,7 +52,7 @@ class Frame;
 class NavigationAction;
 class ResourceError;
 class ResourceResponse;
-class URLKeepingBlobAlive;
+class BlobURLHandle;
 
 enum class NavigationPolicyDecision : uint8_t {
     ContinueLoad,
@@ -91,7 +91,7 @@ public:
 
 private:
     void handleUnimplementablePolicy(const ResourceError&);
-    URLKeepingBlobAlive extendBlobURLLifetimeIfNecessary(const ResourceRequest&, PolicyDecisionMode = PolicyDecisionMode::Asynchronous) const;
+    BlobURLHandle extendBlobURLLifetimeIfNecessary(const ResourceRequest&, PolicyDecisionMode = PolicyDecisionMode::Asynchronous) const;
 
     Frame& m_frame;
 

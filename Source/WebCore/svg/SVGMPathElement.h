@@ -43,6 +43,7 @@ private:
     SVGMPathElement(const QualifiedName&, Document&);
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGMPathElement, SVGElement, SVGURIReference>;
+    const SVGPropertyRegistry& propertyRegistry() const final { return m_propertyRegistry; }
 
     void parseAttribute(const QualifiedName&, const AtomString&) final;
     void svgAttributeChanged(const QualifiedName&) final;
@@ -56,6 +57,8 @@ private:
     void didFinishInsertingNode() final;
 
     void notifyParentOfPathChange(ContainerNode*);
+
+    PropertyRegistry m_propertyRegistry { *this };
 };
 
 } // namespace WebCore

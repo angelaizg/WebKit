@@ -26,6 +26,8 @@
 #include "config.h"
 #include "InlineInvalidation.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineDamage.h"
 
 namespace WebCore {
@@ -83,3 +85,4 @@ void InlineInvalidation::horizontalConstraintChanged()
 
 }
 }
+#endif

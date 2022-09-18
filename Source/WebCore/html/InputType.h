@@ -154,7 +154,7 @@ public:
         Type::Submit,
     };
 
-    static RefPtr<InputType> createIfDifferent(HTMLInputElement&, const AtomString&, InputType* currentInputType = nullptr);
+    static Ref<InputType> create(HTMLInputElement&, const AtomString&);
     static Ref<InputType> createText(HTMLInputElement&);
     virtual ~InputType();
 
@@ -420,7 +420,7 @@ private:
     const Type m_type;
     bool m_hasCreatedShadowSubtree { false };
     // m_element is null if this InputType is no longer associated with an element (either the element died or changed input type).
-    WeakPtr<HTMLInputElement, WeakPtrImplWithEventTargetData> m_element;
+    WeakPtr<HTMLInputElement> m_element;
 };
 
 template<typename DowncastedType>

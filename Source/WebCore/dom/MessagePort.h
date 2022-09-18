@@ -47,7 +47,7 @@ class WebCoreOpaqueRoot;
 
 struct StructuredSerializeOptions;
 
-class MessagePort final : public ActiveDOMObject, public EventTarget {
+class MessagePort final : public ActiveDOMObject, public EventTargetWithInlineData {
     WTF_MAKE_NONCOPYABLE(MessagePort);
     WTF_MAKE_ISO_ALLOCATED(MessagePort);
 public:
@@ -86,7 +86,7 @@ public:
 
     WEBCORE_EXPORT bool isLocallyReachable() const;
 
-    // EventTarget.
+    // EventTargetWithInlineData.
     EventTargetInterface eventTargetInterface() const final { return MessagePortEventTargetInterfaceType; }
     ScriptExecutionContext* scriptExecutionContext() const final { return ActiveDOMObject::scriptExecutionContext(); }
     void refEventTarget() final { ref(); }

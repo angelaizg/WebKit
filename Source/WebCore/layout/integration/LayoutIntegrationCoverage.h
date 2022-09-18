@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "RenderStyleConstants.h"
 #include <wtf/Forward.h>
 
@@ -114,3 +116,4 @@ OptionSet<AvoidanceReason> canUseForLineLayoutWithReason(const RenderBlockFlow&,
 }
 }
 
+#endif

@@ -108,7 +108,7 @@ private:
     bool operator==(const EventListener&) const override;
     void handleEvent(ScriptExecutionContext&, Event&) override;
 
-    WeakPtr<PDFDocument, WeakPtrImplWithEventTargetData> m_document;
+    WeakPtr<PDFDocument> m_document;
 };
 
 void PDFDocumentEventListener::handleEvent(ScriptExecutionContext&, Event& event)

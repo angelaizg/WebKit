@@ -52,8 +52,6 @@ public:
     virtual void didRemoveCachedImageClient(CachedImage&) { }
 
     virtual void scheduleRenderingUpdateForImage(CachedImage&) { }
-
-    virtual bool allowsAnimation() const { return true; }
 };
 
 } // namespace WebCore

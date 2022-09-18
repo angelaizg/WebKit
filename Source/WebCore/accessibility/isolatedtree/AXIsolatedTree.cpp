@@ -71,13 +71,16 @@ AXIsolatedTree::~AXIsolatedTree()
     AXTRACE("AXIsolatedTree::~AXIsolatedTree"_s);
 }
 
-void AXIsolatedTree::queueForDestruction()
+void AXIsolatedTree::clear()
 {
-    AXTRACE("AXIsolatedTree::queueForDestruction"_s);
+    AXTRACE("AXIsolatedTree::clear"_s);
     ASSERT(isMainThread());
+    m_axObjectCache = nullptr;
+    m_nodeMap.clear();
 
     Locker locker { m_changeLogLock };
-    m_queuedForDestruction = true;
+    m_pendingSubtreeRemovals.append(m_rootNode->objectID());
+    m_rootNode = nullptr;
 }
 
 RefPtr<AXIsolatedTree> AXIsolatedTree::treeForID(AXIsolatedTreeID treeID)
@@ -127,10 +130,12 @@ void AXIsolatedTree::removeTreeForPageID(PageIdentifier pageID)
 {
     AXTRACE("AXIsolatedTree::removeTreeForPageID"_s);
     ASSERT(isMainThread());
-
     Locker locker { s_cacheLock };
-    if (auto tree = treePageCache().take(pageID))
-        tree->queueForDestruction();
+
+    if (auto tree = treePageCache().take(pageID)) {
+        tree->clear();
+        treeIDCache().remove(tree->treeID());
+    }
 }
 
 RefPtr<AXIsolatedTree> AXIsolatedTree::treeForPageID(PageIdentifier pageID)
@@ -174,7 +179,7 @@ Vector<RefPtr<AXCoreObject>> AXIsolatedTree::objectsForIDs(const Vector<AXID>& a
             if (!cache || !cache->relationTargetIDs().contains(axID))
                 return nullptr;
 
-            RefPtr axObject = cache->objectForID(axID);
+            auto* axObject = cache->objectForID(axID);
             if (!axObject || !axObject->accessibilityIsIgnored())
                 return nullptr;
 
@@ -259,16 +264,16 @@ void AXIsolatedTree::queueChange(const NodeChange& nodeChange)
     m_pendingChildrenUpdates.append({ objectID, WTFMove(childrenIDs) });
 }
 
-void AXIsolatedTree::addUnconnectedNode(Ref<AccessibilityObject> axObject)
+void AXIsolatedTree::addUnconnectedNode(AccessibilityObject& axObject)
 {
     ASSERT(isMainThread());
 
-    if (!axObject->objectID().isValid() || !axObject->wrapper()) {
-        AXLOG(makeString("AXIsolatedTree::addUnconnectedNode bailing because associated live object ID ", axObject->objectID().loggingString(), " had no wrapper or had an invalid ID. Object is:"));
-        AXLOG(axObject.ptr());
+    if (!axObject.objectID().isValid() || !axObject.wrapper()) {
+        AXLOG(makeString("AXIsolatedTree::addUnconnectedNode bailing because associated live object ID ", axObject.objectID().loggingString(), " had no wrapper or had an invalid ID. Object is:"));
+        AXLOG(&axObject);
         return;
     }
-    AXLOG(makeString("AXIsolatedTree::addUnconnectedNode creating isolated object from live object ID ", axObject->objectID().loggingString()));
+    AXLOG(makeString("AXIsolatedTree::addUnconnectedNode creating isolated object from live object ID ", axObject.objectID().loggingString()));
 
     // Because we are queuing a change for an object not intended to be connected to the rest of the tree,
     // we don't need to update m_nodeMap or m_pendingChildrenUpdates for this object or its parent as is
@@ -277,10 +282,10 @@ void AXIsolatedTree::addUnconnectedNode(Ref<AccessibilityObject> axObject)
     // Instead, just directly create and queue the node change so m_readerThreadNodeMap can hold a reference
     // to it. It will be removed from m_readerThreadNodeMap when the corresponding DOM element, renderer, or
     // other entity is removed from the page.
-    auto object = AXIsolatedObject::create(axObject, this);
-    object->attachPlatformWrapper(axObject->wrapper());
+    auto isolatedObject = AXIsolatedObject::create(axObject, this);
+    isolatedObject->attachPlatformWrapper(axObject.wrapper());
 
-    NodeChange nodeChange { object, nullptr };
+    NodeChange nodeChange { isolatedObject, nullptr };
     Locker locker { m_changeLogLock };
     m_pendingAppends.append(WTFMove(nodeChange));
 }
@@ -622,9 +627,7 @@ void AXIsolatedTree::updateChildren(AccessibilityObject& axObject, ResolveNodeCh
 RefPtr<AXIsolatedObject> AXIsolatedTree::focusedNode()
 {
     AXTRACE("AXIsolatedTree::focusedNode"_s);
-    ASSERT(!isMainThread());
-    // applyPendingChanges can destroy `this` tree, so protect it until the end of this method.
-    Ref protectedThis { *this };
+    RELEASE_ASSERT(!isMainThread());
     // Apply pending changes in case focus has changed and hasn't been updated.
     applyPendingChanges();
     AXLOG(makeString("focusedNodeID ", m_focusedNodeID.loggingString()));
@@ -756,28 +759,6 @@ void AXIsolatedTree::applyPendingChanges()
         return;
 
     Locker locker { m_changeLogLock };
-
-    if (UNLIKELY(m_queuedForDestruction)) {
-        // Protect this until we have fully self-destructed.
-        Ref protectedThis { *this };
-
-        for (const auto& object : m_readerThreadNodeMap.values())
-            object->detach(AccessibilityDetachmentType::CacheDestroyed);
-
-        Locker locker { s_cacheLock };
-#ifndef NDEBUG
-        ASSERT(treeIDCache().contains(treeID()));
-        auto iterator = treeIDCache().find(treeID());
-        if (iterator != treeIDCache().end()) {
-            // At this point, there should only be two references left to this tree -- one in the treeIDCache() map,
-            // and the `protectedThis` above.
-            ASSERT(iterator->value->refCount() == 2, "Unexpected refcount before attempting to destroy isolated tree: %d", iterator->value->refCount());
-        }
-#endif
-
-        treeIDCache().remove(treeID());
-        return;
-    }
 
     if (m_pendingFocusedNodeID != m_focusedNodeID) {
         AXLOG(makeString("focusedNodeID ", m_focusedNodeID.loggingString(), " pendingFocusedNodeID ", m_pendingFocusedNodeID.loggingString()));

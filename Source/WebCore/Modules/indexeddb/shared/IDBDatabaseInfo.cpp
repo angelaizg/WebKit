@@ -33,12 +33,14 @@ namespace WebCore {
 
 WTF_MAKE_ISO_ALLOCATED_IMPL(IDBDatabaseInfo);
 
-IDBDatabaseInfo::IDBDatabaseInfo(const String& name, uint64_t version, uint64_t maxIndexID, uint64_t maxObjectStoreID, HashMap<uint64_t, IDBObjectStoreInfo>&& objectStoreMap)
+IDBDatabaseInfo::IDBDatabaseInfo()
+{
+}
+
+IDBDatabaseInfo::IDBDatabaseInfo(const String& name, uint64_t version, uint64_t maxIndexID)
     : m_name(name)
     , m_version(version)
-    , m_maxObjectStoreID(maxObjectStoreID)
     , m_maxIndexID(maxIndexID)
-    , m_objectStoreMap(WTFMove(objectStoreMap))
 {
 }
 

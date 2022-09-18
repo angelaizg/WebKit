@@ -45,5 +45,4 @@
     // FIXME 169871: add channelCount
     boolean deviceId = true;
     boolean groupId = true;
-    boolean displaySurface = true;
 };

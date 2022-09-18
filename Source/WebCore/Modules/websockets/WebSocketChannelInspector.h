@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "EventTarget.h"
 #include "WebSocketFrame.h"
 #include <wtf/Forward.h>
 #include <wtf/ObjectIdentifier.h>
@@ -33,7 +32,6 @@
 namespace WebCore {
 
 class Document;
-class WeakPtrImplWithEventTargetData;
 class ResourceRequest;
 class ResourceResponse;
 class WebSocketChannel;
@@ -44,7 +42,6 @@ using WebSocketChannelIdentifier = ObjectIdentifier<WebSocketChannel>;
 class WEBCORE_EXPORT WebSocketChannelInspector {
 public:
     explicit WebSocketChannelInspector(Document&);
-    ~WebSocketChannelInspector();
 
     void didCreateWebSocket(const URL&) const;
     void willSendWebSocketHandshakeRequest(const ResourceRequest&) const;
@@ -59,7 +56,7 @@ public:
     static WebSocketFrame createFrame(const uint8_t* data, size_t length, WebSocketFrame::OpCode);
 
 private:
-    WeakPtr<Document, WeakPtrImplWithEventTargetData> m_document;
+    WeakPtr<Document> m_document;
     WebSocketChannelIdentifier m_progressIdentifier;
 };
 

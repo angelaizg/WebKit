@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineDisplayLine.h"
 #include "InlineFormattingContext.h"
 #include "InlineLineBuilder.h"
@@ -47,7 +49,7 @@ private:
     };
     EnclosingLineGeometry collectEnclosingLineGeometry(const LineBox&, const InlineRect& lineBoxRect) const;
     InlineRect flipLogicalLineRectToVisualForWritingMode(const InlineRect&, WritingMode) const;
-    std::optional<FloatRect> trailingEllipsisRect(const LineBuilder::LineContent&, const LineBox&, const FloatRect& lineBoxVisualRect) const;
+    std::optional<FloatRect> trailingEllipsisRect(const LineBuilder::LineContent&, const LineBox&) const;
 
     const InlineFormattingContext& formattingContext() const { return m_inlineFormattingContext; }
     const Box& root() const { return formattingContext().root(); }
@@ -59,3 +61,4 @@ private:
 }
 }
 
+#endif

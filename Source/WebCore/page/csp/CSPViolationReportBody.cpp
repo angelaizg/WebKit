@@ -44,7 +44,7 @@ const AtomString& CSPViolationReportBody::cspReportType()
 }
 
 CSPViolationReportBody::CSPViolationReportBody(Init&& init)
-    : ReportBody(ViolationReportType::ContentSecurityPolicy)
+    : ReportBody(ReportBodyType::CSPViolation)
     , m_documentURL(WTFMove(init.documentURI))
     , m_referrer(init.referrer.isNull() ? emptyString() : WTFMove(init.referrer))
     , m_blockedURL(WTFMove(init.blockedURI))

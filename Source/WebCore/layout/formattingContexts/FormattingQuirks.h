@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FormattingContext.h"
 
 namespace WebCore {
@@ -56,3 +58,4 @@ SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::Layout::ToValueTypeName) \
     static bool isType(const WebCore::Layout::FormattingQuirks& formattingQuirks) { return formattingQuirks.predicate; } \
 SPECIALIZE_TYPE_TRAITS_END()
 
+#endif

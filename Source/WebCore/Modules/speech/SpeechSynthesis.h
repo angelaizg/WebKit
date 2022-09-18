@@ -42,7 +42,7 @@ class Document;
 class PlatformSpeechSynthesizerClient;
 class SpeechSynthesisVoice;
 
-class SpeechSynthesis : public PlatformSpeechSynthesizerClient, public SpeechSynthesisClientObserver, public RefCounted<SpeechSynthesis>, public ContextDestructionObserver, public EventTarget {
+class SpeechSynthesis : public PlatformSpeechSynthesizerClient, public SpeechSynthesisClientObserver, public RefCounted<SpeechSynthesis>, public ContextDestructionObserver, public EventTargetWithInlineData {
     WTF_MAKE_ISO_ALLOCATED(SpeechSynthesis);
 public:
     static Ref<SpeechSynthesis> create(ScriptExecutionContext&);
@@ -63,7 +63,7 @@ public:
     const Vector<Ref<SpeechSynthesisVoice>>& getVoices();
 
     // Used in testing to use a mock platform synthesizer
-    WEBCORE_EXPORT void setPlatformSynthesizer(Ref<PlatformSpeechSynthesizer>&&);
+    WEBCORE_EXPORT void setPlatformSynthesizer(std::unique_ptr<PlatformSpeechSynthesizer>);
 
     // Restrictions to change default behaviors.
     enum BehaviorRestrictionFlags {
@@ -106,7 +106,7 @@ private:
     
     PlatformSpeechSynthesizer& ensurePlatformSpeechSynthesizer();
     
-    RefPtr<PlatformSpeechSynthesizer> m_platformSpeechSynthesizer;
+    std::unique_ptr<PlatformSpeechSynthesizer> m_platformSpeechSynthesizer;
     Vector<Ref<SpeechSynthesisVoice>> m_voiceList;
     RefPtr<SpeechSynthesisUtterance> m_currentSpeechUtterance;
     Deque<Ref<SpeechSynthesisUtterance>> m_utteranceQueue;

@@ -26,6 +26,8 @@
 #include "config.h"
 #include "TableFormattingContext.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "BlockFormattingState.h"
 #include "FloatingState.h"
 #include "InlineFormattingState.h"
@@ -565,3 +567,4 @@ void TableFormattingContext::computeAndDistributeExtraSpace(LayoutUnit available
 }
 }
 
+#endif

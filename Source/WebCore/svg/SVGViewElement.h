@@ -45,13 +45,15 @@ private:
     SVGViewElement(const QualifiedName&, Document&);
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGViewElement, SVGElement, SVGFitToViewBox>;
+    const SVGPropertyRegistry& propertyRegistry() const final { return m_propertyRegistry; }
 
     void parseAttribute(const QualifiedName&, const AtomString&) final;
     void svgAttributeChanged(const QualifiedName&) override;
 
     bool rendererIsNeeded(const RenderStyle&) final { return false; }
 
-    WeakPtr<SVGSVGElement, WeakPtrImplWithEventTargetData> m_targetElement;
+    PropertyRegistry m_propertyRegistry { *this };
+    WeakPtr<SVGSVGElement> m_targetElement { nullptr };
 };
 
 } // namespace WebCore

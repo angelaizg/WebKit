@@ -46,7 +46,9 @@ struct EndLineBoxIterator { };
 class LineBox {
 public:
     using PathVariant = std::variant<
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
         LineBoxIteratorModernPath,
+#endif
         LineBoxIteratorLegacyPath
     >;
 

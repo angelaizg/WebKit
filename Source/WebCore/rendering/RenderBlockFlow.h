@@ -36,9 +36,11 @@ class LineBreaker;
 class RenderMultiColumnFlow;
 class RenderRubyRun;
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
 namespace LayoutIntegration {
 class LineLayout;
 }
+#endif
 
 #if ENABLE(TEXT_AUTOSIZING)
 enum LineCount {
@@ -352,8 +354,10 @@ public:
 
     const LegacyLineLayout* legacyLineLayout() const;
     LegacyLineLayout* legacyLineLayout();
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
     const LayoutIntegration::LineLayout* modernLineLayout() const;
     LayoutIntegration::LineLayout* modernLineLayout();
+#endif
 
 #if ENABLE(TREE_DEBUGGING)
     void outputFloatingObjects(WTF::TextStream&, int depth) const;
@@ -517,9 +521,11 @@ private:
     bool hasLineLayout() const;
     bool hasLegacyLineLayout() const;
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
     bool hasModernLineLayout() const;
     void layoutModernLines(bool relayoutChildren, LayoutUnit& repaintLogicalTop, LayoutUnit& repaintLogicalBottom);
     bool tryComputePreferredWidthsUsingModernPath(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth);
+#endif
 
     void adjustIntrinsicLogicalWidthsForColumns(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const;
     void computeInlinePreferredLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const;
@@ -558,7 +564,9 @@ protected:
 private:
     std::variant<
         std::monostate,
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
         std::unique_ptr<LayoutIntegration::LineLayout>,
+#endif
         std::unique_ptr<LegacyLineLayout>
     > m_lineLayout;
 
@@ -587,6 +595,7 @@ inline LegacyLineLayout* RenderBlockFlow::legacyLineLayout()
     return hasLegacyLineLayout() ? std::get<std::unique_ptr<LegacyLineLayout>>(m_lineLayout).get() : nullptr;
 }
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
 inline bool RenderBlockFlow::hasModernLineLayout() const
 {
     return std::holds_alternative<std::unique_ptr<LayoutIntegration::LineLayout>>(m_lineLayout);
@@ -601,6 +610,7 @@ inline LayoutIntegration::LineLayout* RenderBlockFlow::modernLineLayout()
 {
     return hasModernLineLayout() ? std::get<std::unique_ptr<LayoutIntegration::LineLayout>>(m_lineLayout).get() : nullptr;
 }
+#endif
 
 inline LayoutUnit RenderBlockFlow::endPaddingWidthForCaret() const
 {

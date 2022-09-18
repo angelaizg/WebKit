@@ -32,7 +32,7 @@ WTF_MAKE_ISO_ALLOCATED_IMPL(SVGFontFaceFormatElement);
 using namespace SVGNames;
     
 inline SVGFontFaceFormatElement::SVGFontFaceFormatElement(const QualifiedName& tagName, Document& document)
-    : SVGElement(tagName, document, makeUniqueRef<PropertyRegistry>(*this))
+    : SVGElement(tagName, document)
 {
     ASSERT(hasTagName(font_face_formatTag));
 }

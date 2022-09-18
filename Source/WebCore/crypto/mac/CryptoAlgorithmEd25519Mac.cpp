@@ -11,12 +11,9 @@
 #include "CryptoAlgorithmEd25519.h"
 
 #if ENABLE(WEB_CRYPTO)
-extern "C" {
-#include <corecrypto/ccec25519.h>
-}
 #include "CommonCryptoUtilities.h"
 #include "CryptoKeyEC.h"
-
+#include <pal/spi/cocoa/CoreCryptoSPI.h>
 
 namespace WebCore {
 static ExceptionOr<Vector<uint8_t>> signEd25519(CryptoAlgorithmIdentifier hash, const PlatformECKey key, size_t keyLengthInBytes, const Vector<uint8_t>& data)
@@ -100,78 +97,8 @@ static ExceptionOr<Vector<uint8_t>> signEd25519(CryptoAlgorithmIdentifier hash, 
 }
 
 
-static ExceptionOr<bool> verifyEd25519(CryptoAlgorithmIdentifier hash, const PlatformECKey key, size_t keyLengthInBytes, const Vector<uint8_t>& signature, const Vector<uint8_t> data)
-{
-    CCDigestAlgorithm digestAlgorithm;
-    if (!getCommonCryptoDigestAlgorithm(hash, digestAlgorithm))
-        return Exception { OperationError };
-
-    auto cryptoDigestAlgorithm = WebCore::cryptoDigestAlgorithm(hash);
-    if (!cryptoDigestAlgorithm)
-        return Exception { OperationError };
-    auto digest = PAL::CryptoDigest::create(*cryptoDigestAlgorithm);
-    if (!digest)
-        return Exception { OperationError };
-    digest->addBytes(data.data(), data.size());
-    auto digestData = digest->computeHash();
-
-    if (signature.size() != keyLengthInBytes * 2)
-        return false;
-
-    // FIXME: <rdar://problem/31618371>
-    // Convert the signature into DER format.
-    // tag + length(1) + tag + length(1) + InitialOctet(?) + r + tag + length(1) + InitialOctet(?) + s
-    // Skip any heading 0s of r and s.
-    size_t rStart = 0;
-    while (rStart < keyLengthInBytes && !signature[rStart])
-        rStart++;
-    size_t sStart = keyLengthInBytes;
-    while (sStart < signature.size() && !signature[sStart])
-        sStart++;
-    if (rStart >= keyLengthInBytes || sStart >= signature.size())
-        return false;
-
-    // InitialOctet is needed when the first byte of r/s is larger than or equal to 128.
-    bool rNeedsInitialOctet = signature[rStart] >= 128;
-    bool sNeedsInitialOctet = signature[sStart] >= 128;
-
-    // Construct the DER signature.
-    Vector<uint8_t> newSignature;
-    newSignature.reserveInitialCapacity(6 + keyLengthInBytes * 3  + rNeedsInitialOctet + sNeedsInitialOctet - rStart - sStart);
-    newSignature.append(SequenceMark);
-    addEncodedASN1Length(newSignature, 4 + keyLengthInBytes * 3  + rNeedsInitialOctet + sNeedsInitialOctet - rStart - sStart);
-    newSignature.append(IntegerMark);
-    addEncodedASN1Length(newSignature, keyLengthInBytes + rNeedsInitialOctet - rStart);
-    if (rNeedsInitialOctet)
-        newSignature.append(InitialOctet);
-    newSignature.append(signature.data() + rStart, keyLengthInBytes - rStart);
-    newSignature.append(IntegerMark);
-    addEncodedASN1Length(newSignature, keyLengthInBytes * 2 + sNeedsInitialOctet - sStart);
-    if (sNeedsInitialOctet)
-        newSignature.append(InitialOctet);
-    newSignature.append(signature.data() + sStart, keyLengthInBytes * 2 - sStart);
-
-    uint32_t valid;
-    CCCryptorStatus status = CCECCryptorVerifyHash(key, digestData.data(), digestData.size(), newSignature.data(), newSignature.size(), &valid);
-    if (status) {
-        WTFLogAlways("ERROR: CCECCryptorVerifyHash() returns error=%d", status);
-        return false;
-    }
-    return valid;
-}
-
-
 ExceptionOr<Vector<uint8_t>> CryptoAlgorithmEd25519::platformSign(const CryptoAlgorithmEd25519Params& parameters, const CryptoKeyEC& key, const Vector<uint8_t>& data)
 {
     return signEd25519(parameters.hashIdentifier, key.platformKey(), key.keySizeInBytes(), data);
 }
-
-
-
-ExceptionOr<bool> CryptoAlgorithmEd25519::platformVerify(const CryptoAlgorithmEcdsaParams& parameters, const CryptoKeyEC& key, const Vector<uint8_t>& signature, const Vector<uint8_t>& data)
-{
-    return verifyEd25519(parameters.hashIdentifier, key.platformKey(), key.keySizeInBytes(), signature, data);
-}
-
-} // n
 }

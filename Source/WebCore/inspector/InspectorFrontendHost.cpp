@@ -628,12 +628,8 @@ bool InspectorFrontendHost::isBeingInspected()
 
 void InspectorFrontendHost::setAllowsInspectingInspector(bool allow)
 {
-    if (!m_frontendPage)
-        return;
-
-    m_frontendPage->settings().setDeveloperExtrasEnabled(allow);
-    if (m_client)
-        m_client->setInspectorPageDeveloperExtrasEnabled(m_frontendPage->settings().developerExtrasEnabled());
+    if (m_frontendPage)
+        m_frontendPage->settings().setDeveloperExtrasEnabled(allow);
 }
 
 bool InspectorFrontendHost::supportsShowCertificate() const

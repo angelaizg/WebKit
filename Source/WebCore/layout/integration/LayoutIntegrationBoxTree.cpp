@@ -26,6 +26,8 @@
 #include "config.h"
 #include "LayoutIntegrationBoxTree.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineWalker.h"
 #include "LayoutContainerBox.h"
 #include "LayoutInlineTextBox.h"
@@ -384,5 +386,7 @@ void showInlineContent(TextStream& stream, const InlineContent& inlineContent, s
 
 }
 }
+
+#endif
 
 

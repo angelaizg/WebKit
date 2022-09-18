@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutBox.h"
 #include <wtf/IsoMalloc.h>
 
@@ -48,3 +50,4 @@ private:
 
 SPECIALIZE_TYPE_TRAITS_LAYOUT_BOX(LineBreakBox, isLineBreakBox())
 
+#endif

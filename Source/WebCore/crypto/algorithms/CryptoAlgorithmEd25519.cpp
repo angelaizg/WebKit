@@ -52,7 +52,7 @@ void CryptoAlgorithmEd25519::generateKey(const CryptoAlgorithmParameters& parame
  size_t len,
  const void *cc_sized_by(len) msg,
  const ccec25519pubkey pk,
- const ccec25519secretkey sk);*/
+ const ccec25519secretkey sk);*//*
 void CryptoAlgorithmEd25519::sign(const CryptoAlgorithmParameters& parameters, Ref<CryptoKey>&& key, Vector<uint8_t>&& data, VectorCallback&& callback, ExceptionCallback&& exceptionCallback, ScriptExecutionContext& context, WorkQueue& workQueue)
 {
     if (key->type() != CryptoKeyType::Private) {
@@ -64,8 +64,8 @@ void CryptoAlgorithmEd25519::sign(const CryptoAlgorithmParameters& parameters, R
         [parameters = crossThreadCopy(downcast<CryptoAlgorithmEcdsaParams>(parameters)), key = WTFMove(key), data = WTFMove(data)] {
             return platformSign(parameters, downcast<CryptoKeyEC>(key.get()), data);
         });
-}
-
+}*/
+/*
 void CryptoAlgorithmEd25519::verify(const CryptoAlgorithmParameters& parameters, Ref<CryptoKey>&& key, Vector<uint8_t>&& signature, Vector<uint8_t>&& data, BoolCallback&& callback, ExceptionCallback&& exceptionCallback, ScriptExecutionContext& context, WorkQueue& workQueue)
 {
     if (key->type() != CryptoKeyType::Public) {
@@ -183,6 +183,6 @@ void CryptoAlgorithmEd25519::exportKey(CryptoKeyFormat format, Ref<CryptoKey>&& 
 
     callback(format, WTFMove(result));
 }
-
+*/
 } // namespace WebCore
 #endif // ENABLE(WEB_CRYPTO)

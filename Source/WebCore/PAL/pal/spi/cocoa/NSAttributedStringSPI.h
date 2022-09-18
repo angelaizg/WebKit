@@ -97,7 +97,11 @@ SOFT_LINK_CONSTANT(UIFoundation, NSTextAlternativesAttributeName, NSString *)
 #define NSTextAlternativesAttributeName getNSTextAlternativesAttributeName()
 
 #if HAVE(NSTEXTLIST_MARKER_FORMATS)
+#if USE(APPLE_INTERNAL_SDK)
 #import <UIKit/NSTextList.h>
+#else
+typedef NSString *NSTextListMarkerFormat;
+#endif // USE(APPLE_INTERNAL_SDK)
 SOFT_LINK_CONSTANT(UIFoundation, NSTextListMarkerCircle, NSTextListMarkerFormat)
 #define NSTextListMarkerCircle getNSTextListMarkerCircle()
 SOFT_LINK_CONSTANT(UIFoundation, NSTextListMarkerDisc, NSTextListMarkerFormat)

@@ -31,7 +31,7 @@ namespace WebCore {
 #ifndef NDEBUG
 void CertificateInfo::dump() const
 {
-#if PLATFORM(COCOA)
+#if HAVE(SEC_TRUST_SERIALIZATION)
     if (m_trust) {
         CFIndex entries = SecTrustGetCertificateCount(trust());
 
@@ -48,9 +48,10 @@ void CertificateInfo::dump() const
 #endif
             NSLog(@"  %@", (__bridge NSString *)summary.get());
         }
+
         return;
     }
-#elif PLATFORM(WIN)
+#endif
     if (m_certificateChain) {
         CFIndex entries = CFArrayGetCount(m_certificateChain.get());
 
@@ -63,7 +64,7 @@ void CertificateInfo::dump() const
 
         return;
     }
-#endif
+
     NSLog(@"CertificateInfo (Empty)\n");
 }
 #endif

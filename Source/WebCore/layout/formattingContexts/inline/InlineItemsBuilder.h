@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineFormattingState.h"
 #include "LayoutContainerBox.h"
 #include <wtf/text/StringBuilder.h>
@@ -61,3 +63,4 @@ private:
 }
 }
 
+#endif

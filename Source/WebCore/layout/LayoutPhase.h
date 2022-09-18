@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include <optional>
 
 namespace WebCore {
@@ -61,3 +63,4 @@ public:
 
 }
 }
+#endif

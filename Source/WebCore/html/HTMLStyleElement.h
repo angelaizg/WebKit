@@ -31,9 +31,9 @@ class HTMLStyleElement;
 class Page;
 class StyleSheet;
 
-template<typename T, typename Counter> class EventSender;
+template<typename T> class EventSender;
 
-using StyleEventSender = EventSender<HTMLStyleElement, WeakPtrImplWithEventTargetData>;
+using StyleEventSender = EventSender<HTMLStyleElement>;
 
 class HTMLStyleElement final : public HTMLElement {
     WTF_MAKE_ISO_ALLOCATED(HTMLStyleElement);

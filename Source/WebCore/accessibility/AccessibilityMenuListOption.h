@@ -58,7 +58,7 @@ private:
     String stringValue() const final;
     bool computeAccessibilityIsIgnored() const final;
 
-    WeakPtr<HTMLOptionElement, WeakPtrImplWithEventTargetData> m_element;
+    WeakPtr<HTMLOptionElement> m_element;
     AccessibilityObject* m_parent;
 };
 

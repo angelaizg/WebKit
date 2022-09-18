@@ -31,9 +31,7 @@
 
 namespace WebCore {
 
-class FormData;
 class Report;
-enum class ViolationReportType : uint8_t;
 
 struct WEBCORE_EXPORT ReportingClient {
 
@@ -41,8 +39,6 @@ struct WEBCORE_EXPORT ReportingClient {
 
     virtual void notifyReportObservers(Ref<Report>&&) = 0;
     virtual String endpointURIForToken(const String&) const = 0;
-    virtual void sendReportToEndpoints(const URL& baseURL, const Vector<String>& endpointURIs, const Vector<String>& endpointTokens, Ref<FormData>&& report, ViolationReportType) = 0;
-    virtual String httpUserAgent() const = 0;
 };
 
 } // namespace WebCore

@@ -46,7 +46,6 @@ class IntRect;
 class FloatQuad;
 class Page;
 class RenderElement;
-class WeakPtrImplWithEventTargetData;
 struct GapRects;
 
 class ImageOverlayController final : private PageOverlay::Client
@@ -93,16 +92,16 @@ private:
 
     WeakPtr<Page> m_page;
     RefPtr<PageOverlay> m_overlay;
-    WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData> m_hostElementForSelection;
+    WeakPtr<HTMLElement> m_hostElementForSelection;
     Vector<FloatQuad> m_selectionQuads;
     LayoutRect m_selectionClipRect;
     Color m_selectionBackgroundColor { Color::transparentBlack };
 
 #if PLATFORM(MAC)
-    using ContainerAndHighlight = std::pair<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>, Ref<DataDetectorHighlight>>;
+    using ContainerAndHighlight = std::pair<WeakPtr<HTMLElement>, Ref<DataDetectorHighlight>>;
     Vector<ContainerAndHighlight> m_dataDetectorContainersAndHighlights;
     RefPtr<DataDetectorHighlight> m_activeDataDetectorHighlight;
-    WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData> m_hostElementForDataDetectors;
+    WeakPtr<HTMLElement> m_hostElementForDataDetectors;
 #endif
 };
 

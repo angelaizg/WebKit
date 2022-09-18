@@ -26,6 +26,8 @@
 #include "config.h"
 #include "FlexFormattingGeometry.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FlexFormattingContext.h"
 #include "LayoutContext.h"
 
@@ -90,3 +92,4 @@ IntrinsicWidthConstraints FlexFormattingGeometry::intrinsicWidthConstraints(cons
 }
 }
 
+#endif

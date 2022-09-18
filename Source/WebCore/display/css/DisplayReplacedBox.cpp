@@ -26,6 +26,8 @@
 #include "config.h"
 #include "DisplayReplacedBox.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include <wtf/IsoMallocInlines.h>
 
 namespace WebCore {
@@ -46,3 +48,4 @@ const char* ReplacedBox::boxName() const
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

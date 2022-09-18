@@ -26,6 +26,8 @@
 #include "config.h"
 #include "DisplayBoxClip.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "RenderStyle.h"
 
 namespace WebCore {
@@ -72,3 +74,4 @@ void BoxClip::pushRoundedClip(const FloatRoundedRect& roundedRect)
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

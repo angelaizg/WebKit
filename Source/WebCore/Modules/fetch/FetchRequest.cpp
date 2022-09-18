@@ -171,7 +171,6 @@ ExceptionOr<void> FetchRequest::initializeWith(const String& url, Init&& init)
     m_options.credentials = Credentials::SameOrigin;
     m_referrer = "client"_s;
     m_request.setURL(requestURL);
-    m_requestURL = WTFMove(requestURL);
     m_request.setInitiatorIdentifier(scriptExecutionContext()->resourceRequestIdentifier());
 
     auto optionsResult = initializeOptions(init);
@@ -199,6 +198,9 @@ ExceptionOr<void> FetchRequest::initializeWith(const String& url, Init&& init)
             return setBodyResult.releaseException();
     }
 
+    if (requestURL.protocolIsBlob())
+        m_requestBlobURLLifetimeExtender = requestURL;
+
     updateContentType();
     return { };
 }
@@ -206,7 +208,6 @@ ExceptionOr<void> FetchRequest::initializeWith(const String& url, Init&& init)
 ExceptionOr<void> FetchRequest::initializeWith(FetchRequest& input, Init&& init)
 {
     m_request = input.m_request;
-    m_requestURL = m_request.url();
     m_navigationPreloadIdentifier = input.navigationPreloadIdentifier();
 
     m_options = input.m_options;
@@ -237,6 +238,9 @@ ExceptionOr<void> FetchRequest::initializeWith(FetchRequest& input, Init&& init)
     auto setBodyResult = init.body ? setBody(WTFMove(*init.body)) : setBody(input);
     if (setBodyResult.hasException())
         return setBodyResult;
+
+    if (m_request.url().protocolIsBlob())
+        m_requestBlobURLLifetimeExtender = m_request.url();
 
     updateContentType();
     return { };
@@ -311,7 +315,9 @@ String FetchRequest::referrer() const
 
 const String& FetchRequest::urlString() const
 {
-    return m_requestURL.url().string();
+    if (m_requestURL.isNull())
+        m_requestURL = m_request.url().string();
+    return m_requestURL;
 }
 
 ResourceRequest FetchRequest::resourceRequest() const
@@ -342,7 +348,7 @@ ExceptionOr<Ref<FetchRequest>> FetchRequest::clone()
 
 void FetchRequest::stop()
 {
-    m_requestURL = URL { };
+    m_requestBlobURLLifetimeExtender.clear();
     FetchBodyOwner::stop();
 }
 

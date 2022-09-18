@@ -77,8 +77,10 @@ static void releaseNoncriticalMemory(MaintainMemoryCache maintainMemoryCache)
     for (auto* document : Document::allDocuments()) {
         document->clearSelectorQueryCache();
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
         if (auto* renderView = document->renderView())
             LayoutIntegration::LineLayout::releaseCaches(*renderView);
+#endif
     }
 
     if (maintainMemoryCache == MaintainMemoryCache::No)

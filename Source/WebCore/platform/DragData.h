@@ -108,7 +108,6 @@ public:
     OptionSet<DragDestinationAction> dragDestinationActionMask() const { return m_dragDestinationActionMask; }
     void setFileNames(Vector<String>& fileNames) { m_fileNames = WTFMove(fileNames); }
     const Vector<String>& fileNames() const { return m_fileNames; }
-    void disallowFileAccess();
 #if PLATFORM(COCOA)
     const String& pasteboardName() const { return m_pasteboardName; }
     bool containsURLTypeIdentifier() const;
@@ -134,7 +133,6 @@ private:
 #if PLATFORM(WIN)
     DragDataMap m_dragDataMap;
 #endif
-    bool m_disallowFileAccess { false };
 };
     
 } // namespace WebCore

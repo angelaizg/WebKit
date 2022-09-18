@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "DisplayGeometryTypes.h"
 #include "DisplayStyle.h"
 #include "FloatRect.h"
@@ -104,3 +106,4 @@ SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::Display::ToValueTypeName) \
     static bool isType(const WebCore::Display::Box& box) { return box.predicate; } \
 SPECIALIZE_TYPE_TRAITS_END()
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

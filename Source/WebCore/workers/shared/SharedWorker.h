@@ -27,9 +27,9 @@
 
 #include "AbstractWorker.h"
 #include "ActiveDOMObject.h"
+#include "BlobURL.h"
 #include "SharedWorkerKey.h"
 #include "SharedWorkerObjectIdentifier.h"
-#include "URLKeepingBlobAlive.h"
 #include <wtf/MonotonicTime.h>
 
 namespace WebCore {
@@ -74,7 +74,7 @@ private:
     SharedWorkerObjectIdentifier m_identifier;
     Ref<MessagePort> m_port;
     String m_identifierForInspector;
-    URLKeepingBlobAlive m_blobURLExtension;
+    BlobURLHandle m_blobURLExtension;
     bool m_isActive { true };
     bool m_isSuspendedForBackForwardCache { false };
 };

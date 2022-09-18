@@ -26,6 +26,8 @@
 #include "config.h"
 #include "TextUtil.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "BreakLines.h"
 #include "FontCascade.h"
 #include "InlineTextItem.h"
@@ -369,3 +371,4 @@ TextRun TextUtil::ellipsisTextRun(bool isHorizontal)
 
 }
 }
+#endif

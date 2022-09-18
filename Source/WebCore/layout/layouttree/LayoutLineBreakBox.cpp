@@ -26,6 +26,8 @@
 #include "config.h"
 #include "LayoutLineBreakBox.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "RenderStyle.h"
 #include <wtf/IsoMallocInlines.h>
 
@@ -43,3 +45,4 @@ LineBreakBox::LineBreakBox(bool isOptional, RenderStyle&& style, std::unique_ptr
 }
 }
 
+#endif

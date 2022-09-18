@@ -56,7 +56,7 @@ static bool schemeRequiresHost(const URL& url)
 {
     // We expect URLs with these schemes to have authority components. If the
     // URL lacks an authority component, we get concerned and mark the origin
-    // as opaque.
+    // as unique.
     return url.protocolIsInHTTPFamily() || url.protocolIs("ftp"_s);
 }
 
@@ -91,7 +91,7 @@ static RefPtr<SecurityOrigin> getCachedOrigin(const URL& url)
     return nullptr;
 }
 
-static bool shouldTreatAsOpaqueOrigin(const URL& url)
+static bool shouldTreatAsUniqueOrigin(const URL& url)
 {
     if (!url.isValid())
         return true;
@@ -101,7 +101,7 @@ static bool shouldTreatAsOpaqueOrigin(const URL& url)
     if (!innerURL.isValid())
         return true;
 
-    // For edge case URLs that were probably misparsed, make sure that the origin is opaque.
+    // For edge case URLs that were probably misparsed, make sure that the origin is unique.
     // This is an additional safety net against bugs in URL parsing, and for network back-ends that parse URLs differently,
     // and could misinterpret another component for hostname.
     if (schemeRequiresHost(innerURL) && innerURL.host().isEmpty())
@@ -195,7 +195,7 @@ SecurityOrigin::SecurityOrigin(const URL& url)
 SecurityOrigin::SecurityOrigin()
     : m_data { emptyString(), emptyString(), std::nullopt }
     , m_domain { emptyString() }
-    , m_opaqueOriginIdentifier { OpaqueOriginIdentifier::generateThreadSafe() }
+    , m_uniqueOriginIdentifier { UniqueOriginIdentifier::generateThreadSafe() }
     , m_isPotentiallyTrustworthy { false }
 {
 }
@@ -204,7 +204,7 @@ SecurityOrigin::SecurityOrigin(const SecurityOrigin* other)
     : m_data { other->m_data.isolatedCopy() }
     , m_domain { other->m_domain.isolatedCopy() }
     , m_filePath { other->m_filePath.isolatedCopy() }
-    , m_opaqueOriginIdentifier { other->m_opaqueOriginIdentifier }
+    , m_uniqueOriginIdentifier { other->m_uniqueOriginIdentifier }
     , m_universalAccess { other->m_universalAccess }
     , m_domainWasSetInDOM { other->m_domainWasSetInDOM }
     , m_canLoadLocalResources { other->m_canLoadLocalResources }
@@ -220,7 +220,7 @@ Ref<SecurityOrigin> SecurityOrigin::create(const URL& url)
     if (RefPtr<SecurityOrigin> cachedOrigin = getCachedOrigin(url))
         return cachedOrigin.releaseNonNull();
 
-    if (shouldTreatAsOpaqueOrigin(url))
+    if (shouldTreatAsUniqueOrigin(url))
         return adoptRef(*new SecurityOrigin);
 
     if (shouldUseInnerURL(url))
@@ -229,10 +229,10 @@ Ref<SecurityOrigin> SecurityOrigin::create(const URL& url)
     return adoptRef(*new SecurityOrigin(url));
 }
 
-Ref<SecurityOrigin> SecurityOrigin::createOpaque()
+Ref<SecurityOrigin> SecurityOrigin::createUnique()
 {
     Ref<SecurityOrigin> origin(adoptRef(*new SecurityOrigin));
-    ASSERT(origin.get().isOpaque());
+    ASSERT(origin.get().isUnique());
     return origin;
 }
 
@@ -276,8 +276,8 @@ bool SecurityOrigin::isSameOriginDomain(const SecurityOrigin& other) const
     if (this == &other)
         return true;
 
-    if (isOpaque() || other.isOpaque())
-        return m_opaqueOriginIdentifier == other.m_opaqueOriginIdentifier;
+    if (isUnique() || other.isUnique())
+        return m_uniqueOriginIdentifier == other.m_uniqueOriginIdentifier;
 
     // Here are two cases where we should permit access:
     //
@@ -331,12 +331,12 @@ bool SecurityOrigin::canRequest(const URL& url) const
     if (getCachedOrigin(url) == this)
         return true;
 
-    if (isOpaque())
+    if (isUnique())
         return false;
 
     Ref<SecurityOrigin> targetOrigin(SecurityOrigin::create(url));
 
-    if (targetOrigin->isOpaque())
+    if (targetOrigin->isUnique())
         return false;
 
     // We call isSameSchemeHostPort here instead of canAccess because we want
@@ -353,9 +353,6 @@ bool SecurityOrigin::canRequest(const URL& url) const
 bool SecurityOrigin::canReceiveDragData(const SecurityOrigin& dragInitiator) const
 {
     if (this == &dragInitiator)
-        return true;
-
-    if (dragInitiator.isLocal() && isLocal())
         return true;
 
     return isSameOriginDomain(dragInitiator);
@@ -424,7 +421,7 @@ SecurityOrigin::Policy SecurityOrigin::canShowNotifications() const
 {
     if (m_universalAccess)
         return AlwaysAllow;
-    if (isOpaque())
+    if (isUnique())
         return AlwaysDeny;
     return Ask;
 }
@@ -434,8 +431,8 @@ bool SecurityOrigin::isSameOriginAs(const SecurityOrigin& other) const
     if (this == &other)
         return true;
 
-    if (isOpaque() || other.isOpaque())
-        return m_opaqueOriginIdentifier == other.m_opaqueOriginIdentifier;
+    if (isUnique() || other.isUnique())
+        return m_uniqueOriginIdentifier == other.m_uniqueOriginIdentifier;
 
     return isSameSchemeHostPort(other);
 }
@@ -506,7 +503,7 @@ void SecurityOrigin::setEnforcesFilePathSeparation()
 
 String SecurityOrigin::toString() const
 {
-    if (isOpaque())
+    if (isUnique())
         return "null"_s;
     if (m_data.protocol == "file"_s && m_enforcesFilePathSeparation)
         return "null"_s;
@@ -527,8 +524,8 @@ static inline bool areOriginsMatching(const SecurityOrigin& origin1, const Secur
 {
     ASSERT(&origin1 != &origin2);
 
-    if (origin1.isOpaque() || origin2.isOpaque())
-        return origin1.isOpaque() == origin2.isOpaque();
+    if (origin1.isUnique() || origin2.isUnique())
+        return origin1.isUnique() == origin2.isUnique();
 
     if (origin1.protocol() != origin2.protocol())
         return false;
@@ -579,8 +576,8 @@ bool SecurityOrigin::equal(const SecurityOrigin* other) const
     if (other == this)
         return true;
 
-    if (isOpaque() || other->isOpaque())
-        return m_opaqueOriginIdentifier == other->m_opaqueOriginIdentifier;
+    if (isUnique() || other->isUnique())
+        return m_uniqueOriginIdentifier == other->m_uniqueOriginIdentifier;
     
     if (!isSameSchemeHostPort(*other))
         return false;

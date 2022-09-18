@@ -92,7 +92,7 @@ CSSSelectorList CSSSelectorParser::consumeForgivingSelectorList(CSSParserTokenRa
     auto consumeForgiving = [&] {
         auto selector = consumeSelector(range);
 
-        if (m_failedParsing && !m_disableForgivingParsing) {
+        if (m_failedParsing) {
             selector = { };
             m_failedParsing = false;
         }
@@ -112,11 +112,8 @@ CSSSelectorList CSSSelectorParser::consumeForgivingSelectorList(CSSParserTokenRa
         consumeForgiving();
     }
 
-    if (selectorList.isEmpty()) {
-        if (m_disableForgivingParsing)
-            m_failedParsing = true;
+    if (selectorList.isEmpty())
         return { };
-    }
 
     return CSSSelectorList { WTFMove(selectorList) };
 }
@@ -139,9 +136,6 @@ bool CSSSelectorParser::supportsComplexSelector(CSSParserTokenRange range, const
 {
     range.consumeWhitespace();
     CSSSelectorParser parser(context, nullptr);
-
-    // @supports requires that all arguments parse.
-    parser.m_disableForgivingParsing = true;
 
     // FIXME: https://bugs.webkit.org/show_bug.cgi?id=215635
     // Unknown css selector combinator is not addressed correctly in |CSSSelectorParser::consumeComplexSelector|.

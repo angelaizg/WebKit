@@ -60,7 +60,7 @@ private:
     bool matchesValidPseudoClass() const final;
     bool matchesInvalidPseudoClass() const final;
 
-    WeakHashSet<HTMLFormControlElement, WeakPtrImplWithEventTargetData> m_invalidDescendants;
+    WeakHashSet<HTMLFormControlElement> m_invalidDescendants;
     bool m_hasDisabledAttribute { false };
 };
 

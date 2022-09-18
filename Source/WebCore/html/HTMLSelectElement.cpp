@@ -247,10 +247,11 @@ void HTMLSelectElement::remove(int optionIndex)
 
 String HTMLSelectElement::value() const
 {
-    for (auto& item : listItems()) {
-        if (auto* option = dynamicDowncast<HTMLOptionElement>(item.get())) {
-            if (option->selected())
-                return option->value();
+    for (auto* item : listItems()) {
+        if (is<HTMLOptionElement>(*item)) {
+            HTMLOptionElement& option = downcast<HTMLOptionElement>(*item);
+            if (option.selected())
+                return option.value();
         }
     }
     return emptyString();
@@ -259,14 +260,18 @@ String HTMLSelectElement::value() const
 void HTMLSelectElement::setValue(const String& value)
 {
     // Find the option with value() matching the given parameter and make it the current selection.
-    auto optionIndex = listItems().findIf([&] (const auto& item) {
-        if (auto* optionElement = dynamicDowncast<HTMLOptionElement>(item.get()))
-            return optionElement->value() == value;
+    unsigned optionIndex = 0;
+    for (auto* item : listItems()) {
+        if (is<HTMLOptionElement>(*item)) {
+            if (downcast<HTMLOptionElement>(*item).value() == value) {
+                setSelectedIndex(optionIndex);
+                return;
+            }
+            ++optionIndex;
+        }
+    }
 
-        return false;
-    });
-
-    setSelectedIndex(optionIndex);
+    setSelectedIndex(-1);
 }
 
 bool HTMLSelectElement::hasPresentationalHintsForAttribute(const QualifiedName& name) const
@@ -399,8 +404,6 @@ CompletionHandlerCallingScope HTMLSelectElement::optionToSelectFromChildChangeSc
 
 void HTMLSelectElement::childrenChanged(const ChildChange& change)
 {
-    ASSERT(change.affectsElements != ChildChange::AffectsElements::Unknown);
-
     if (change.affectsElements == ChildChange::AffectsElements::No) {
         HTMLFormControlElementWithState::childrenChanged(change);
         return;
@@ -759,13 +762,13 @@ void HTMLSelectElement::setOptionsChangedOnRenderer()
     }
 }
 
-const Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>>& HTMLSelectElement::listItems() const
+const Vector<HTMLElement*>& HTMLSelectElement::listItems() const
 {
     if (m_shouldRecalcListItems)
         recalcListItems();
     else {
 #if ASSERT_ENABLED
-        Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>> items = m_listItems;
+        Vector<HTMLElement*> items = m_listItems;
         recalcListItems(false);
         ASSERT(items == m_listItems);
 #endif
@@ -877,7 +880,7 @@ void HTMLSelectElement::selectOption(int optionIndex, SelectOptionFlags flags)
 
     RefPtr<HTMLElement> element;
     if (listIndex >= 0)
-        element = items[listIndex].get();
+        element = items[listIndex];
 
     if (shouldDeselect)
         deselectItemsWithoutValidation(element.get());

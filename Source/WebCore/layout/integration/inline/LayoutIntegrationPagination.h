@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutIntegrationInlineContent.h"
 
 namespace WebCore {
@@ -38,3 +40,4 @@ std::unique_ptr<InlineContent> adjustLinePositionsForPagination(const InlineCont
 }
 }
 
+#endif

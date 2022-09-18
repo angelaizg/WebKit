@@ -31,7 +31,6 @@
 #include "DataTransfer.h"
 #include "DeleteSelectionCommand.h"
 #include "DocumentInlines.h"
-#include "EditCommand.h"
 #include "Editing.h"
 #include "Editor.h"
 #include "Element.h"
@@ -388,11 +387,6 @@ void TypingCommand::doApply()
 AtomString TypingCommand::inputEventTypeName() const
 {
     return inputTypeNameForEditingAction(m_currentTypingEditAction);
-}
-
-bool TypingCommand::isInputMethodComposing() const
-{
-    return isInputMethodComposingForEditingAction(m_currentTypingEditAction);
 }
 
 bool TypingCommand::isBeforeInputEventCancelable() const

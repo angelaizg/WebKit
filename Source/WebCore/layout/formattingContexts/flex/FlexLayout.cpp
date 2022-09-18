@@ -26,6 +26,8 @@
 #include "config.h"
 #include "FlexLayout.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FlexFormattingContext.h"
 #include "FlexRect.h"
 #include "LayoutContext.h"
@@ -534,3 +536,4 @@ FlexLayout::LogicalFlexItemRects FlexLayout::layout(const LogicalConstraints& co
 }
 }
 
+#endif

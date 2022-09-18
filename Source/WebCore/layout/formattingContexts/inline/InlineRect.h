@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutUnits.h"
 
 namespace WebCore {
@@ -322,3 +324,4 @@ inline InlineRect::operator InlineLayoutRect() const
 
 }
 }
+#endif

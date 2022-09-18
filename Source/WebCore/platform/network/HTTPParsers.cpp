@@ -559,7 +559,7 @@ XFrameOptionsDisposition parseXFrameOptionsHeader(StringView header)
     if (header.isEmpty())
         return result;
 
-    for (auto currentHeader : header.splitAllowingEmptyEntries(',')) {
+    for (auto currentHeader : header.split(',')) {
         currentHeader = currentHeader.stripWhiteSpace();
         XFrameOptionsDisposition currentValue = XFrameOptionsDisposition::None;
         if (equalLettersIgnoringASCIICase(currentHeader, "deny"_s))

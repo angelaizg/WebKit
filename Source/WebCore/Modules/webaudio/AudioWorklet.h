@@ -55,7 +55,7 @@ private:
     // Worklet.
     Vector<Ref<WorkletGlobalScopeProxy>> createGlobalScopes() final;
 
-    WeakPtr<BaseAudioContext, WeakPtrImplWithEventTargetData> m_audioContext;
+    WeakPtr<BaseAudioContext> m_audioContext;
 };
 
 } // namespace WebCore

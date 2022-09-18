@@ -383,14 +383,13 @@ JSC::JSInternalPromise* ScriptModuleLoader::importModule(JSC::JSGlobalObject* js
     ASSERT(parameters);
 
     auto specifier = moduleName->value(jsGlobalObject);
-    RETURN_IF_EXCEPTION(scope, reject(scope));
     auto result = resolveModuleSpecifier(m_context, m_ownerType, specifier, baseURL);
     if (!result) {
         scope.release();
         return rejectPromise(globalObject, TypeError, result.error());
     }
 
-    RELEASE_AND_RETURN(scope, JSC::importModule(jsGlobalObject, JSC::Identifier::fromString(vm, result->string()), JSC::JSScriptFetchParameters::create(vm, parameters.releaseNonNull()), JSC::JSScriptFetcher::create(vm, WTFMove(scriptFetcher))));
+    return JSC::importModule(jsGlobalObject, JSC::Identifier::fromString(vm, result->string()), JSC::JSScriptFetchParameters::create(vm, parameters.releaseNonNull()), JSC::JSScriptFetcher::create(vm, WTFMove(scriptFetcher)));
 }
 
 JSC::JSObject* ScriptModuleLoader::createImportMetaProperties(JSC::JSGlobalObject* jsGlobalObject, JSC::JSModuleLoader*, JSC::JSValue moduleKeyValue, JSC::JSModuleRecord*, JSC::JSValue)

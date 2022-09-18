@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Apple Inc. All rights reserved.
+ * Copyright (C) 2018 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,13 +23,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <wtf/ObjectIdentifier.h>
+#include "config.h"
+#include "ContentSecurityPolicyClient.h"
 
 namespace WebCore {
 
-enum MainThreadPermissionObserverIdentifierType { };
-using MainThreadPermissionObserverIdentifier = ObjectIdentifier<MainThreadPermissionObserverIdentifierType>;
+void ContentSecurityPolicyClient::willSendCSPViolationReport(CSPInfo&)
+{
+}
 
 } // namespace WebCore
+

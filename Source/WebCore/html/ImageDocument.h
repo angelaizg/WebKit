@@ -68,7 +68,7 @@ private:
 
     void imageUpdated();
 
-    WeakPtr<ImageDocumentElement, WeakPtrImplWithEventTargetData> m_imageElement;
+    WeakPtr<ImageDocumentElement> m_imageElement;
 
     // Whether enough of the image has been loaded to determine its size.
     bool m_imageSizeIsKnown;

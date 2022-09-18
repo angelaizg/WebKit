@@ -44,10 +44,8 @@ typedef struct __IOSurface *IOSurfaceRef;
 - (void)_purgeDevice;
 @end
 
-#if !PLATFORM(IOS_FAMILY_SIMULATOR)
 @interface MTLSharedTextureHandle(Private)
 - (instancetype)initWithIOSurface:(IOSurfaceRef)ioSurface label:(NSString*)label;
 @end
-#endif
 
 #endif

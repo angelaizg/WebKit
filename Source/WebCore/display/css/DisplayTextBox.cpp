@@ -26,6 +26,8 @@
 #include "config.h"
 #include "DisplayTextBox.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include <wtf/IsoMallocInlines.h>
 #include <wtf/text/TextStream.h>
 
@@ -67,3 +69,4 @@ String TextBox::debugDescription() const
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

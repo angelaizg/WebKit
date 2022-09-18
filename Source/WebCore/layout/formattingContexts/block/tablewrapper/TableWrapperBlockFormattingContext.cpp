@@ -26,6 +26,8 @@
 #include "config.h"
 #include "TableWrapperBlockFormattingContext.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "BlockFormattingGeometry.h"
 #include "BlockFormattingState.h"
 #include "BlockMarginCollapse.h"
@@ -244,3 +246,4 @@ void TableWrapperBlockFormattingContext::computeHeightAndMarginForTableBox(const
 }
 }
 
+#endif

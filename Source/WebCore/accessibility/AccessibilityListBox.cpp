@@ -74,7 +74,7 @@ void AccessibilityListBox::addChildren()
     m_childrenInitialized = true;
 
     for (const auto& listItem : downcast<HTMLSelectElement>(*selectNode).listItems())
-        addChild(listBoxOptionAccessibilityObject(listItem.get()), DescendIfIgnored::No);
+        addChild(listBoxOptionAccessibilityObject(listItem), DescendIfIgnored::No);
 }
 
 void AccessibilityListBox::setSelectedChildren(const AccessibilityChildrenVector& children)

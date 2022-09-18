@@ -83,6 +83,7 @@ protected:
     SVGAnimationElement(const QualifiedName&, Document&);
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGAnimationElement, SVGElement, SVGTests>;
+    const SVGPropertyRegistry& propertyRegistry() const override { return m_propertyRegistry; }
 
     virtual void resetAnimation();
 
@@ -143,6 +144,7 @@ private:
     String m_lastValuesAnimationTo;
     CalcMode m_calcMode { CalcMode::Linear };
     AnimationMode m_animationMode { AnimationMode::None };
+    PropertyRegistry m_propertyRegistry { *this };
 };
 
 } // namespace WebCore

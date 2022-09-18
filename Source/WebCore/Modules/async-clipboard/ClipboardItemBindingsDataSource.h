@@ -36,7 +36,6 @@ namespace WebCore {
 class Blob;
 class SharedBuffer;
 class DOMPromise;
-class WeakPtrImplWithEventTargetData;
 class FileReaderLoader;
 class PasteboardCustomData;
 class ScriptExecutionContext;
@@ -92,7 +91,7 @@ private:
     unsigned m_numberOfPendingClipboardTypes { 0 };
     CompletionHandler<void(std::optional<PasteboardCustomData>)> m_completionHandler;
     Vector<Ref<ClipboardItemTypeLoader>> m_itemTypeLoaders;
-    WeakPtr<Clipboard, WeakPtrImplWithEventTargetData> m_writingDestination;
+    WeakPtr<Clipboard> m_writingDestination;
 
     Vector<KeyValuePair<String, RefPtr<DOMPromise>>> m_itemPromises;
 };

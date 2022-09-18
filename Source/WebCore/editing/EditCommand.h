@@ -41,7 +41,6 @@ class Document;
 class Element;
 
 ASCIILiteral inputTypeNameForEditingAction(EditAction);
-bool isInputMethodComposingForEditingAction(EditAction);
 
 class EditCommand : public RefCounted<EditCommand> {
 public:

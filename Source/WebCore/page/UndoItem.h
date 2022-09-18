@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "EventTarget.h"
 #include "VoidCallback.h"
 #include <wtf/IsoMalloc.h>
 #include <wtf/RefCounted.h>
@@ -75,7 +74,7 @@ private:
     Ref<VoidCallback> m_undoHandler;
     Ref<VoidCallback> m_redoHandler;
     WeakPtr<UndoManager> m_undoManager;
-    WeakPtr<Document, WeakPtrImplWithEventTargetData> m_document;
+    WeakPtr<Document> m_document;
 };
 
 } // namespace WebCore

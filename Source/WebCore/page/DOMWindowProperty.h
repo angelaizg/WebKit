@@ -42,7 +42,7 @@ protected:
     ~DOMWindowProperty() = default;
 
 private:
-    WeakPtr<DOMWindow, WeakPtrImplWithEventTargetData> m_window;
+    WeakPtr<DOMWindow> m_window;
 };
 
 } // namespace WebCore

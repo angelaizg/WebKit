@@ -226,10 +226,7 @@ private:
     };
     CueSetting settingName(VTTScanner&);
 
-    void prepareToSpeak(SpeechSynthesis&, double, double, SpeakCueCompletionHandler&&) final;
-    void beginSpeaking() final;
-    void pauseSpeaking() final;
-    void cancelSpeaking() final;
+    void speak(double, double, SpeakCueCompletionHandler&&) final;
 
     String m_content;
     String m_settings;
@@ -249,7 +246,6 @@ private:
     RefPtr<HTMLDivElement> m_cueBackdropBox;
     RefPtr<VTTCueBox> m_displayTree;
 #if ENABLE(SPEECH_SYNTHESIS)
-    RefPtr<SpeechSynthesis> m_speechSynthesis;
     RefPtr<SpeechSynthesisUtterance> m_speechUtterance;
 #endif
 

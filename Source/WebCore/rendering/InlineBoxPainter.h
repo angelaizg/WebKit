@@ -42,7 +42,9 @@ struct PaintInfo;
 class InlineBoxPainter {
 public:
     InlineBoxPainter(const LegacyInlineFlowBox&, PaintInfo&, const LayoutPoint& paintOffset);
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
     InlineBoxPainter(const LayoutIntegration::InlineContent&, const InlineDisplay::Box&, PaintInfo&, const LayoutPoint& paintOffset);
+#endif
     ~InlineBoxPainter();
 
     void paint();

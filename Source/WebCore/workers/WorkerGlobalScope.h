@@ -71,8 +71,6 @@ class WorkerStorageConnection;
 class WorkerThread;
 struct WorkerParameters;
 
-enum class ViolationReportType : uint8_t;
-
 namespace IDBClient {
 class IDBConnectionProxy;
 }
@@ -94,9 +92,8 @@ public:
     void suspend() final;
     void resume() final;
 
+    using WeakValueType = EventTarget::WeakValueType;
     using EventTarget::weakPtrFactory;
-    using EventTarget::WeakValueType;
-    using EventTarget::WeakPtrImplType;
     WorkerStorageConnection& storageConnection();
     static void postFileSystemStorageTask(Function<void()>&&);
     WorkerFileSystemStorageConnection& getFileSystemStorageConnection(Ref<FileSystemStorageConnection>&&);
@@ -154,6 +151,8 @@ public:
     std::unique_ptr<FontLoadRequest> fontLoadRequest(String& url, bool isSVG, bool isInitiatingElementInUserAgentShadowTree, LoadedFromOpaqueSource) final;
     void beginLoadingFontSoon(FontLoadRequest&) final;
 
+    ReferrerPolicy referrerPolicy() const final;
+
     const Settings::Values& settingsValues() const final { return m_settingsValues; }
 
     FetchOptions::Credentials credentials() const { return m_credentials; }
@@ -202,11 +201,9 @@ private:
 
     void stopIndexedDatabase();
 
-    // ReportingClient.
     void notifyReportObservers(Ref<Report>&&) final;
     String endpointURIForToken(const String&) const final;
-    void sendReportToEndpoints(const URL& baseURL, const Vector<String>& endpointURIs, const Vector<String>& endpointTokens, Ref<FormData>&& report, ViolationReportType) final;
-    String httpUserAgent() const final { return m_userAgent; }
+
 
     URL m_url;
     URL m_ownerURL;
@@ -239,6 +236,7 @@ private:
 #endif
     std::unique_ptr<CSSValuePool> m_cssValuePool;
     RefPtr<CSSFontSelector> m_cssFontSelector;
+    ReferrerPolicy m_referrerPolicy;
     Settings::Values m_settingsValues;
     WorkerType m_workerType;
     FetchOptions::Credentials m_credentials;

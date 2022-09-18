@@ -114,7 +114,7 @@ private:
     FillMode m_fill { FillMode::Auto };
     PlaybackDirection m_direction { PlaybackDirection::Normal };
 
-    WeakPtr<WebAnimation, WeakPtrImplWithEventTargetData> m_animation;
+    WeakPtr<WebAnimation> m_animation;
     RefPtr<TimingFunction> m_timingFunction;
 
     double m_iterationStart { 0 };

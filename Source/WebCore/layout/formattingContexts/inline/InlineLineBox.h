@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineLevelBox.h"
 #include "InlineLine.h"
 #include "InlineRect.h"
@@ -120,3 +122,4 @@ private:
 }
 }
 
+#endif

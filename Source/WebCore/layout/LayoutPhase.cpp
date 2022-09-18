@@ -26,6 +26,8 @@
 #include "config.h"
 #include "LayoutPhase.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include <wtf/NeverDestroyed.h>
 
 namespace WebCore {
@@ -66,3 +68,4 @@ PhaseScope::~PhaseScope()
 
 }
 }
+#endif

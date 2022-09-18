@@ -155,10 +155,6 @@ public:
 
     bool allowsOrientationOverride() const;
 
-    bool allowsAnimation() const;
-    WEBCORE_EXPORT void setAllowsAnimation(bool);
-    WEBCORE_EXPORT void resetAllowsAnimation();
-
 protected:
     HTMLImageElement(const QualifiedName&, Document&, HTMLFormElement* = nullptr);
 
@@ -218,8 +214,8 @@ private:
     void setSourceElement(HTMLSourceElement*);
 
     std::unique_ptr<HTMLImageLoader> m_imageLoader;
-    WeakPtr<HTMLFormElement, WeakPtrImplWithEventTargetData> m_form;
-    WeakPtr<HTMLFormElement, WeakPtrImplWithEventTargetData> m_formSetByParser;
+    WeakPtr<HTMLFormElement> m_form;
+    WeakPtr<HTMLFormElement> m_formSetByParser;
 
     CompositeOperator m_compositeOperator;
     AtomString m_bestFitImageURL;
@@ -232,16 +228,14 @@ private:
     bool m_hadNameBeforeAttributeChanged { false }; // FIXME: We only need this because parseAttribute() can't see the old value.
     bool m_isDroppedImagePlaceholder { false };
 
-    WeakPtr<HTMLPictureElement, WeakPtrImplWithEventTargetData> m_pictureElement;
+    WeakPtr<HTMLPictureElement> m_pictureElement;
     // The source element that was selected to provide the source URL.
-    WeakPtr<HTMLSourceElement, WeakPtrImplWithEventTargetData> m_sourceElement;
+    WeakPtr<HTMLSourceElement> m_sourceElement;
     MediaQueryDynamicResults m_mediaQueryDynamicResults;
 
 #if ENABLE(ATTACHMENT_ELEMENT)
     String m_pendingClonedAttachmentID;
 #endif
-
-    Image* image() const;
 
     friend class HTMLPictureElement;
 };

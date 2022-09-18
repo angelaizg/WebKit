@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FontBaseline.h"
 #include "InlineRect.h"
 
@@ -98,3 +100,4 @@ inline Line::Line(const FloatRect& lineBoxRect, const FloatRect& scrollableOverf
 }
 }
 
+#endif

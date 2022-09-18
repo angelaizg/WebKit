@@ -43,8 +43,8 @@ namespace WebCore {
 
 WTF_MAKE_ISO_ALLOCATED_IMPL(SVGTextContentElement);
  
-SVGTextContentElement::SVGTextContentElement(const QualifiedName& tagName, Document& document, UniqueRef<SVGPropertyRegistry>&& propertyRegistry)
-    : SVGGraphicsElement(tagName, document, WTFMove(propertyRegistry))
+SVGTextContentElement::SVGTextContentElement(const QualifiedName& tagName, Document& document)
+    : SVGGraphicsElement(tagName, document)
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [] {

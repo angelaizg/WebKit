@@ -27,6 +27,8 @@
 
 #include "LayoutIterator.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 namespace WebCore {
 namespace Layout {
 
@@ -108,3 +110,4 @@ inline LayoutDescendantIteratorAdapter<T> descendantsOfType(const ContainerBox& 
 
 }
 }
+#endif

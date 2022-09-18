@@ -26,6 +26,8 @@
 #include "config.h"
 #include "DisplayBoxRareGeometry.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "RenderStyle.h"
 
 namespace WebCore {
@@ -73,3 +75,4 @@ FloatRoundedRect roundedInsetBorderForRect(const FloatRect& borderRect, const Fl
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

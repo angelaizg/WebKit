@@ -74,9 +74,9 @@ SpeechSynthesis::SpeechSynthesis(ScriptExecutionContext& context)
 
 SpeechSynthesis::~SpeechSynthesis() = default;
 
-void SpeechSynthesis::setPlatformSynthesizer(Ref<PlatformSpeechSynthesizer>&& synthesizer)
+void SpeechSynthesis::setPlatformSynthesizer(std::unique_ptr<PlatformSpeechSynthesizer> synthesizer)
 {
-    m_platformSpeechSynthesizer = synthesizer.ptr();
+    m_platformSpeechSynthesizer = WTFMove(synthesizer);
     m_voiceList.clear();
     m_currentSpeechUtterance = nullptr;
     m_utteranceQueue.clear();
@@ -93,7 +93,7 @@ void SpeechSynthesis::voicesDidChange()
 PlatformSpeechSynthesizer& SpeechSynthesis::ensurePlatformSpeechSynthesizer()
 {
     if (!m_platformSpeechSynthesizer)
-        m_platformSpeechSynthesizer = PlatformSpeechSynthesizer::create(*this);
+        m_platformSpeechSynthesizer = makeUnique<PlatformSpeechSynthesizer>(this);
     return *m_platformSpeechSynthesizer;
 }
 
@@ -169,9 +169,11 @@ void SpeechSynthesis::cancel()
         // and the event won't be processed. Instead we process the error immediately.
         speakingErrorOccurred();
         m_currentSpeechUtterance = nullptr;
-    } else if (m_platformSpeechSynthesizer)
+    } else if (m_platformSpeechSynthesizer) {
         m_platformSpeechSynthesizer->cancel();
-
+        // The platform should have called back immediately and cleared the current utterance.
+        ASSERT(!m_currentSpeechUtterance);
+    }
     current = nullptr;
 }
 

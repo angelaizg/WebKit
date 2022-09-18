@@ -26,6 +26,8 @@
 #include "config.h"
 #include "LayoutState.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "BlockFormattingState.h"
 #include "FlexFormattingState.h"
 #include "FloatingState.h"
@@ -264,3 +266,4 @@ bool LayoutState::shouldNotSynthesizeInlineBlockBaseline() const
 }
 }
 
+#endif

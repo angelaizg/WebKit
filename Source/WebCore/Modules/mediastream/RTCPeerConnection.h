@@ -83,7 +83,7 @@ struct RTCRtpTransceiverInit {
 
 class RTCPeerConnection final
     : public RefCounted<RTCPeerConnection>
-    , public EventTarget
+    , public EventTargetWithInlineData
     , public ActiveDOMObject
 #if !RELEASE_LOG_DISABLED
     , private LoggerHelper

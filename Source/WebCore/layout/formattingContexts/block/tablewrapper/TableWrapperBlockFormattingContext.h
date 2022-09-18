@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "BlockFormattingContext.h"
 #include "BlockFormattingQuirks.h"
 #include "TableWrapperBlockFormattingQuirks.h"
@@ -62,3 +64,4 @@ private:
 
 SPECIALIZE_TYPE_TRAITS_LAYOUT_FORMATTING_CONTEXT(TableWrapperBlockFormattingContext, isTableWrapperBlockFormattingContext())
 
+#endif

@@ -98,7 +98,7 @@ public:
     void idTargetChanged() override;
 
 private:
-    WeakPtr<HTMLInputElement, WeakPtrImplWithEventTargetData> m_element;
+    WeakPtr<HTMLInputElement> m_element;
 };
 #endif
 
@@ -511,11 +511,10 @@ void HTMLInputElement::resignStrongPasswordAppearance()
 void HTMLInputElement::updateType()
 {
     ASSERT(m_inputType);
-    auto newType = InputType::createIfDifferent(*this, attributeWithoutSynchronization(typeAttr), m_inputType.get());
+    auto newType = InputType::create(*this, attributeWithoutSynchronization(typeAttr));
     m_hasType = true;
-    if (!newType)
+    if (m_inputType->formControlType() == newType->formControlType())
         return;
-    ASSERT(m_inputType->formControlType() != newType->formControlType());
 
     removeFromRadioButtonGroup();
     resignStrongPasswordAppearance();
@@ -626,8 +625,7 @@ void HTMLInputElement::subtreeHasChanged()
 {
     m_inputType->subtreeHasChanged();
     // When typing in an input field, childrenChanged is not called, so we need to force the directionality check.
-    if (selfOrPrecedingNodesAffectDirAuto())
-        updateEffectiveDirectionalityOfDirAuto();
+    updateEffectiveDirectionalityOfDirAuto();
 }
 
 const AtomString& HTMLInputElement::formControlType() const
@@ -717,7 +715,7 @@ inline void HTMLInputElement::initializeInputType()
     }
 
     m_hasType = true;
-    m_inputType = InputType::createIfDifferent(*this, type);
+    m_inputType = InputType::create(*this, type);
     updateWillValidateAndValidity();
     registerForSuspensionCallbackIfNeeded();
     runPostTypeUpdateTasks();
@@ -1053,8 +1051,6 @@ ExceptionOr<void> HTMLInputElement::setValue(const String& value, TextFieldEvent
     setLastChangeWasNotUserEdit();
     setFormControlValueMatchesRenderer(false);
     m_inputType->setValue(WTFMove(sanitizedValue), valueChanged, eventBehavior, selection);
-    if (selfOrPrecedingNodesAffectDirAuto())
-        updateEffectiveDirectionalityOfDirAuto();
 
     bool wasModifiedProgrammatically = eventBehavior == DispatchNoEvent;
     if (wasModifiedProgrammatically) {

@@ -26,6 +26,8 @@
 #include "config.h"
 #include "BlockFormattingState.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include <wtf/IsoMallocInlines.h>
 
 namespace WebCore {
@@ -44,3 +46,4 @@ BlockFormattingState::~BlockFormattingState()
 
 }
 }
+#endif

@@ -36,6 +36,8 @@ public:
     LayoutRect replacedContentRect(const LayoutSize& intrinsicSize) const;
     LayoutRect replacedContentRect() const { return replacedContentRect(intrinsicSize()); }
 
+    bool hasReplacedLogicalWidth() const;
+    bool hasReplacedLogicalHeight() const;
     bool setNeedsLayoutIfNeededAfterIntrinsicSizeChange();
 
     LayoutSize intrinsicSize() const final
@@ -103,8 +105,6 @@ private:
     
     Color calculateHighlightColor() const;
     bool isHighlighted(HighlightState, const HighlightData&) const;
-
-    bool hasReplacedLogicalHeight() const;
 
     mutable LayoutSize m_intrinsicSize;
 };

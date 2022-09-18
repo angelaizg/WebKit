@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FloatRect.h"
 
 namespace WebCore {
@@ -58,3 +60,4 @@ inline auto unionRect(T& a, const T& b) -> typename std::enable_if_t<std::is_bas
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

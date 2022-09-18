@@ -37,6 +37,9 @@
 #include <wtf/HexNumber.h>
 #include <wtf/text/UniquedStringImpl.h>
 
+extern "C" {
+#include <corecrypto/ccec25519.h>
+}
 namespace WebCore {
 
 static const ASCIILiteral P256 { "P-256"_s };

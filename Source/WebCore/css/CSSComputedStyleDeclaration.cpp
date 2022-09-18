@@ -643,14 +643,10 @@ static Ref<CSSValue> computedTranslate(RenderObject* renderer, const RenderStyle
     auto list = CSSValueList::createSpaceSeparated();
     list->append(zoomAdjustedPixelValueForLength(translate->x(), style));
 
-    auto includeLength = [](const Length& length) -> bool {
-        return !length.isZero() || length.isPercent();
-    };
-
-    if (includeLength(translate->y()) || includeLength(translate->z()))
+    if (!translate->y().isZero() || !translate->z().isZero())
         list->append(zoomAdjustedPixelValueForLength(translate->y(), style));
 
-    if (includeLength(translate->z()))
+    if (!translate->z().isZero())
         list->append(zoomAdjustedPixelValueForLength(translate->z(), style));
 
     return list;
@@ -1474,23 +1470,22 @@ static Ref<CSSPrimitiveValue> valueForAnimationName(const Animation::Name& name)
 static Ref<CSSValue> valueForAnimationTimingFunction(const TimingFunction& timingFunction)
 {
     switch (timingFunction.type()) {
-    case TimingFunction::TimingFunctionType::CubicBezierFunction: {
+    case TimingFunction::CubicBezierFunction: {
         auto& function = downcast<CubicBezierTimingFunction>(timingFunction);
-        if (function.timingFunctionPreset() != CubicBezierTimingFunction::TimingFunctionPreset::Custom) {
+        if (function.timingFunctionPreset() != CubicBezierTimingFunction::Custom) {
             CSSValueID valueId = CSSValueInvalid;
             switch (function.timingFunctionPreset()) {
-            case CubicBezierTimingFunction::TimingFunctionPreset::Ease:
+            case CubicBezierTimingFunction::Ease:
                 valueId = CSSValueEase;
                 break;
-            case CubicBezierTimingFunction::TimingFunctionPreset::EaseIn:
+            case CubicBezierTimingFunction::EaseIn:
                 valueId = CSSValueEaseIn;
                 break;
-            case CubicBezierTimingFunction::TimingFunctionPreset::EaseOut:
+            case CubicBezierTimingFunction::EaseOut:
                 valueId = CSSValueEaseOut;
                 break;
-            case CubicBezierTimingFunction::TimingFunctionPreset::Custom:
-            case CubicBezierTimingFunction::TimingFunctionPreset::EaseInOut:
-                ASSERT(function.timingFunctionPreset() == CubicBezierTimingFunction::TimingFunctionPreset::EaseInOut);
+            default:
+                ASSERT(function.timingFunctionPreset() == CubicBezierTimingFunction::EaseInOut);
                 valueId = CSSValueEaseInOut;
                 break;
             }
@@ -1498,15 +1493,16 @@ static Ref<CSSValue> valueForAnimationTimingFunction(const TimingFunction& timin
         }
         return CSSCubicBezierTimingFunctionValue::create(function.x1(), function.y1(), function.x2(), function.y2());
     }
-    case TimingFunction::TimingFunctionType::StepsFunction: {
+    case TimingFunction::StepsFunction: {
         auto& function = downcast<StepsTimingFunction>(timingFunction);
         return CSSStepsTimingFunctionValue::create(function.numberOfSteps(), function.stepPosition());
     }
-    case TimingFunction::TimingFunctionType::SpringFunction: {
+    case TimingFunction::SpringFunction: {
         auto& function = downcast<SpringTimingFunction>(timingFunction);
         return CSSSpringTimingFunctionValue::create(function.mass(), function.stiffness(), function.damping(), function.initialVelocity());
     }
-    case TimingFunction::TimingFunctionType::LinearFunction:
+    default:
+        ASSERT(timingFunction.type() == TimingFunction::LinearFunction);
         return CSSValuePool::singleton().createIdentifierValue(CSSValueLinear);
     }
 }
@@ -3592,14 +3588,14 @@ RefPtr<CSSValue> ComputedStyleExtractor::valueForPropertyInStyle(const RenderSty
             auto list = CSSValueList::createSpaceSeparated();
             if (containment & Containment::Size)
                 list->append(cssValuePool.createIdentifierValue(CSSValueSize));
-            if (containment & Containment::InlineSize)
-                list->append(cssValuePool.createIdentifierValue(CSSValueInlineSize));
             if (containment & Containment::Layout)
                 list->append(cssValuePool.createIdentifierValue(CSSValueLayout));
             if (containment & Containment::Style)
                 list->append(cssValuePool.createIdentifierValue(CSSValueStyle));
             if (containment & Containment::Paint)
                 list->append(cssValuePool.createIdentifierValue(CSSValuePaint));
+            if (containment & Containment::InlineSize)
+                list->append(cssValuePool.createIdentifierValue(CSSValueInlineSize));
             return list;
         }
         case CSSPropertyContainer: {

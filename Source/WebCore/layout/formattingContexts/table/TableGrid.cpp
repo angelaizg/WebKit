@@ -26,6 +26,8 @@
 #include "config.h"
 #include "TableGrid.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include <wtf/IsoMallocInlines.h>
 
 namespace WebCore {
@@ -140,3 +142,4 @@ void TableGrid::removeCell(const ContainerBox& cellBox)
 
 }
 }
+#endif

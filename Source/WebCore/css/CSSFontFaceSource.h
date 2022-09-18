@@ -36,7 +36,6 @@ class CSSFontFace;
 class CSSFontSelector;
 class SharedBuffer;
 class Document;
-class WeakPtrImplWithEventTargetData;
 class Font;
 class FontCreationContext;
 struct FontCustomPlatformData;
@@ -98,7 +97,7 @@ private:
     RefPtr<JSC::ArrayBufferView> m_immediateSource;
     std::unique_ptr<FontCustomPlatformData> m_immediateFontCustomPlatformData;
 
-    WeakPtr<SVGFontFaceElement, WeakPtrImplWithEventTargetData> m_svgFontFaceElement;
+    WeakPtr<SVGFontFaceElement> m_svgFontFaceElement;
     std::unique_ptr<FontCustomPlatformData> m_inDocumentCustomPlatformData;
 
     Status m_status { Status::Pending };

@@ -32,7 +32,6 @@
 #include "FloatPoint.h"
 #include "FloatRect.h"
 #include "FloatRoundedRect.h"
-#include "GeometryUtilities.h"
 #include "PathTraversalState.h"
 #include "RoundedRect.h"
 #include <math.h>
@@ -455,17 +454,23 @@ static FloatRect computeArcBounds(const FloatPoint& center, float radius, float 
     if (clockwise)
         std::swap(start, end);
 
-    if (end - start >= radiansPerTurnFloat) {
+    constexpr float fullCircle = 2 * piFloat;
+    if (end - start >= fullCircle) {
         auto diameter = radius * 2;
         return { center.x() - radius, center.y() - radius, diameter, diameter };
     }
 
-    start = normalizeAngleInRadians(start);
-    end = normalizeAngleInRadians(end);
+    auto normalize = [&] (float radians) {
+        double circles = radians / fullCircle;
+        return fullCircle * (circles - floor(circles));
+    };
+
+    start = normalize(start);
+    end = normalize(end);
 
     auto lengthInRadians = end - start;
     if (start > end)
-        lengthInRadians += radiansPerTurnFloat;
+        lengthInRadians += fullCircle;
 
     FloatPoint startPoint { center.x() + radius * cos(start), center.y() + radius * sin(start) };
     FloatPoint endPoint { center.x() + radius * cos(end), center.y() + radius * sin(end) };
@@ -474,7 +479,7 @@ static FloatRect computeArcBounds(const FloatPoint& center, float radius, float 
 
     auto contains = [&] (float angleToCheck) {
         return (start < angleToCheck && start + lengthInRadians > angleToCheck)
-            || (start > angleToCheck && start + lengthInRadians > angleToCheck + radiansPerTurnFloat);
+            || (start > angleToCheck && start + lengthInRadians > angleToCheck + fullCircle);
     };
 
     if (contains(0))

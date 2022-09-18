@@ -48,7 +48,6 @@ namespace WebCore {
 class CSSStyleSheet;
 class Document;
 class Element;
-class WeakPtrImplWithEventTargetData;
 class HTMLSlotElement;
 class Node;
 class ProcessingInstruction;
@@ -202,9 +201,9 @@ private:
     // Sheets loaded using the @import directive are not included in this count.
     // We use this count of pending sheets to detect when we can begin attaching
     // elements and when it is safe to execute scripts.
-    WeakHashSet<const ProcessingInstruction, WeakPtrImplWithEventTargetData> m_processingInstructionsWithPendingSheets;
-    WeakHashSet<const Element, WeakPtrImplWithEventTargetData> m_elementsInHeadWithPendingSheets;
-    WeakHashSet<const Element, WeakPtrImplWithEventTargetData> m_elementsInBodyWithPendingSheets;
+    WeakHashSet<const ProcessingInstruction> m_processingInstructionsWithPendingSheets;
+    WeakHashSet<const Element> m_elementsInHeadWithPendingSheets;
+    WeakHashSet<const Element> m_elementsInBodyWithPendingSheets;
 
     ListHashSet<Node*> m_styleSheetCandidateNodes;
 
@@ -218,7 +217,7 @@ private:
     bool m_isUpdatingStyleResolver { false };
 
     std::optional<MediaQueryViewportState> m_viewportStateOnPreviousMediaQueryEvaluation;
-    WeakHashMap<Element, LayoutSize, WeakPtrImplWithEventTargetData> m_queryContainerStates;
+    WeakHashMap<Element, LayoutSize> m_queryContainerStates;
 
     // FIXME: These (and some things above) are only relevant for the root scope.
     HashMap<ResolverSharingKey, Ref<Resolver>> m_sharedShadowTreeResolvers;

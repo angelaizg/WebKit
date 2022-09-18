@@ -99,7 +99,7 @@ public:
     bool isEmpty() const { return !size(); }
     size_t size() const { return m_entries.size(); }
 
-    Element* closestElementInScopeWithName(ElementName);
+    Element* closestElementInScopeWithName(const AtomString&);
 
     Entry* find(Element&);
     bool contains(Element&);

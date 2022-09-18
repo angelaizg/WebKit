@@ -26,6 +26,8 @@
 #include "config.h"
 #include "LayoutListMarkerBox.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "RenderStyle.h"
 #include <wtf/IsoMallocInlines.h>
 
@@ -44,3 +46,4 @@ ListMarkerBox::ListMarkerBox(IsImage isImage, IsOutside isOutside, RenderStyle&&
 }
 }
 
+#endif

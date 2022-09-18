@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "DisplayLayerController.h"
 #include "LayoutUnits.h"
 #include <wtf/IsoMalloc.h>
@@ -76,3 +78,4 @@ private:
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

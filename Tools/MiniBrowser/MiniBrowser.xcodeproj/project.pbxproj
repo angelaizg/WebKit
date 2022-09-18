@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -77,6 +77,8 @@
 		BCA8CBDE11E578A000812FB7 /* DebugRelease.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = DebugRelease.xcconfig; sourceTree = "<group>"; };
 		BCA8CBDF11E578A000812FB7 /* MiniBrowser.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = MiniBrowser.xcconfig; sourceTree = "<group>"; };
 		DD403C5328500F6400D899FC /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WebKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB6EB13628D72FDE009345D5 /* JSEd25519.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = JSEd25519.cpp; path = ../../WebKitBuild/Debug/DerivedSources/WebCore/JSEd25519.cpp; sourceTree = "<group>"; };
+		FB6EB13728D72FDE009345D5 /* JSEd25519.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = JSEd25519.hpp; path = ../../WebKitBuild/Debug/DerivedSources/WebCore/JSEd25519.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +138,8 @@
 		29B97314FDCFA39411CA2CEA /* MiniBrowser */ = {
 			isa = PBXGroup;
 			children = (
+				FB6EB13628D72FDE009345D5 /* JSEd25519.cpp */,
+				FB6EB13728D72FDE009345D5 /* JSEd25519.hpp */,
 				256AC3F00F4B6AF500CF3369 /* MiniBrowser_Prefix.pch */,
 				080E96DDFE201D6D7F000001 /* MiniBrowser */,
 				29B97317FDCFA39411CA2CEA /* Resources */,

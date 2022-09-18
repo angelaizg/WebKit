@@ -24,22 +24,18 @@
 #include <wtf/Hasher.h>
 #include <wtf/NeverDestroyed.h>
 #include <wtf/text/AtomString.h>
-#include <wtf/text/AtomStringHash.h>
 
 namespace WebCore {
-
-enum class ElementName : uint16_t;
-enum class Namespace : uint8_t;
 
 struct QualifiedNameComponents {
     AtomStringImpl* m_prefix;
     AtomStringImpl* m_localName;
-    AtomStringImpl* m_namespaceURI;
+    AtomStringImpl* m_namespace;
 };
 
 inline void add(Hasher& hasher, const QualifiedNameComponents& components)
 {
-    add(hasher, components.m_prefix, components.m_localName, components.m_namespaceURI);
+    add(hasher, components.m_prefix, components.m_localName, components.m_namespace);
 }
 
 DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(QualifiedName);
@@ -61,29 +57,33 @@ public:
         unsigned computeHash() const;
 
         mutable unsigned m_existingHash { 0 };
-        Namespace m_namespace;
-        ElementName m_elementName;
         const AtomString m_prefix;
         const AtomString m_localName;
-        const AtomString m_namespaceURI;
+        const AtomString m_namespace;
         mutable AtomString m_localNameUpper;
 
 #if ENABLE(JIT)
         static ptrdiff_t localNameMemoryOffset() { return OBJECT_OFFSETOF(QualifiedNameImpl, m_localName); }
-        static ptrdiff_t namespaceMemoryOffset() { return OBJECT_OFFSETOF(QualifiedNameImpl, m_namespaceURI); }
+        static ptrdiff_t namespaceMemoryOffset() { return OBJECT_OFFSETOF(QualifiedNameImpl, m_namespace); }
 #endif
 
     private:
-        friend class QualifiedName;
-
-        QualifiedNameImpl(const AtomString& prefix, const AtomString& localName, const AtomString& namespaceURI);
+        QualifiedNameImpl(const AtomString& prefix, const AtomString& localName, const AtomString& namespaceURI)
+            : m_prefix(prefix)
+            , m_localName(localName)
+            , m_namespace(namespaceURI)
+        {
+            ASSERT(!namespaceURI.isEmpty() || namespaceURI.isNull());
+        }        
     };
 
     WEBCORE_EXPORT QualifiedName(const AtomString& prefix, const AtomString& localName, const AtomString& namespaceURI);
-    WEBCORE_EXPORT QualifiedName(const AtomString& prefix, const AtomString& localName, const AtomString& namespaceURI, Namespace, ElementName);
     QualifiedName(QualifiedNameImpl& impl) : m_impl(&impl) { }
     explicit QualifiedName(WTF::HashTableDeletedValueType) : m_impl(WTF::HashTableDeletedValue) { }
     bool isHashTableDeletedValue() const { return m_impl.isHashTableDeletedValue(); }
+#ifdef QNAME_DEFAULT_CONSTRUCTOR
+    QualifiedName() { }
+#endif
 
     bool operator==(const QualifiedName& other) const { return m_impl == other.m_impl; }
     bool operator!=(const QualifiedName& other) const { return !(*this == other); }
@@ -95,11 +95,10 @@ public:
 
     const AtomString& prefix() const { return m_impl->m_prefix; }
     const AtomString& localName() const { return m_impl->m_localName; }
-    const AtomString& namespaceURI() const { return m_impl->m_namespaceURI; }
-    const AtomString& localNameUpper() const;
+    const AtomString& namespaceURI() const { return m_impl->m_namespace; }
 
-    ElementName elementName() const { return m_impl->m_elementName; }
-    Namespace nodeNamespace() const { return m_impl->m_namespace; }
+    // Uppercased localName, cached for efficiency
+    const AtomString& localNameUpper() const;
 
     String toString() const;
     AtomString toAtomString() const;
@@ -120,7 +119,7 @@ private:
 
 inline void add(Hasher& hasher, const QualifiedName::QualifiedNameImpl& impl)
 {
-    add(hasher, impl.m_prefix, impl.m_localName, impl.m_namespaceURI);
+    add(hasher, impl.m_prefix, impl.m_localName, impl.m_namespace);
 }
 
 inline void add(Hasher& hasher, const QualifiedName& name)

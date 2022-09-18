@@ -26,6 +26,8 @@
 #include "config.h"
 #include "TableFormattingGeometry.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineFormattingState.h"
 #include "LayoutBoxGeometry.h"
 #include "LayoutContext.h"
@@ -176,3 +178,4 @@ LayoutUnit TableFormattingGeometry::verticalSpaceForCellContent(const TableGrid:
 }
 }
 
+#endif

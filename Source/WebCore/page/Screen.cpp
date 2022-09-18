@@ -56,7 +56,7 @@ unsigned Screen::height() const
     if (!frame)
         return 0;
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ScreenAPIsAccessed::Height);
+        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ResourceLoadStatistics::ScreenAPI::Height);
     return static_cast<unsigned>(frame->screenSize().height());
 }
 
@@ -66,7 +66,7 @@ unsigned Screen::width() const
     if (!frame)
         return 0;
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ScreenAPIsAccessed::Width);
+        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ResourceLoadStatistics::ScreenAPI::Width);
     return static_cast<unsigned>(frame->screenSize().width());
 }
 
@@ -76,7 +76,7 @@ unsigned Screen::colorDepth() const
     if (!frame)
         return 0;
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ScreenAPIsAccessed::ColorDepth);
+        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ResourceLoadStatistics::ScreenAPI::ColorDepth);
     return static_cast<unsigned>(screenDepth(frame->view()));
 }
 
@@ -86,7 +86,7 @@ unsigned Screen::pixelDepth() const
     if (!frame)
         return 0;
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ScreenAPIsAccessed::PixelDepth);
+        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ResourceLoadStatistics::ScreenAPI::PixelDepth);
 
     auto* document = window()->document();
     if (!document || !document->quirks().needsHDRPixelDepthQuirk() || !screenSupportsHighDynamicRange(frame->view()))
@@ -101,7 +101,7 @@ int Screen::availLeft() const
     if (!frame)
         return 0;
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ScreenAPIsAccessed::AvailLeft);
+        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ResourceLoadStatistics::ScreenAPI::AvailLeft);
     return static_cast<int>(screenAvailableRect(frame->view()).x());
 }
 
@@ -111,7 +111,7 @@ int Screen::availTop() const
     if (!frame)
         return 0;
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ScreenAPIsAccessed::AvailTop);
+        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ResourceLoadStatistics::ScreenAPI::AvailTop);
     return static_cast<int>(screenAvailableRect(frame->view()).y());
 }
 
@@ -121,7 +121,7 @@ unsigned Screen::availHeight() const
     if (!frame)
         return 0;
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ScreenAPIsAccessed::AvailHeight);
+        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ResourceLoadStatistics::ScreenAPI::AvailHeight);
     return static_cast<unsigned>(screenAvailableRect(frame->view()).height());
 }
 
@@ -131,7 +131,7 @@ unsigned Screen::availWidth() const
     if (!frame)
         return 0;
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ScreenAPIsAccessed::AvailWidth);
+        ResourceLoadObserver::shared().logScreenAPIAccessed(*frame->document(), ResourceLoadStatistics::ScreenAPI::AvailWidth);
     return static_cast<unsigned>(screenAvailableRect(frame->view()).width());
 }
 

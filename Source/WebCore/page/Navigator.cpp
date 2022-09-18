@@ -73,7 +73,7 @@ String Navigator::appVersion() const
     if (!frame)
         return String();
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), NavigatorAPIsAccessed::AppVersion);
+        ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), ResourceLoadStatistics::NavigatorAPI::AppVersion);
     return NavigatorBase::appVersion();
 }
 
@@ -83,7 +83,7 @@ const String& Navigator::userAgent() const
     if (!frame || !frame->page())
         return m_userAgent;
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), NavigatorAPIsAccessed::UserAgent);
+        ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), ResourceLoadStatistics::NavigatorAPI::UserAgent);
     if (m_userAgent.isNull())
         m_userAgent = frame->loader().userAgent(frame->document()->url());
     return m_userAgent;
@@ -288,7 +288,7 @@ DOMPluginArray& Navigator::plugins()
 {
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled()) {
         if (auto* frame = this->frame())
-            ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), NavigatorAPIsAccessed::Plugins);
+            ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), ResourceLoadStatistics::NavigatorAPI::Plugins);
     }
     initializePluginAndMimeTypeArrays();
     return *m_plugins;
@@ -298,7 +298,7 @@ DOMMimeTypeArray& Navigator::mimeTypes()
 {
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled()) {
         if (auto* frame = this->frame())
-            ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), NavigatorAPIsAccessed::MimeTypes);
+            ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), ResourceLoadStatistics::NavigatorAPI::MimeTypes);
     }
     initializePluginAndMimeTypeArrays();
     return *m_mimeTypes;
@@ -311,7 +311,7 @@ bool Navigator::cookieEnabled() const
         return false;
 
     if (DeprecatedGlobalSettings::webAPIStatisticsEnabled())
-        ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), NavigatorAPIsAccessed::CookieEnabled);
+        ResourceLoadObserver::shared().logNavigatorAPIAccessed(*frame->document(), ResourceLoadStatistics::NavigatorAPI::CookieEnabled);
 
     auto* page = frame->page();
     if (!page)

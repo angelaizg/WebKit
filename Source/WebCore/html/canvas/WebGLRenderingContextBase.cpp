@@ -1843,26 +1843,17 @@ void WebGLRenderingContextBase::bufferData(GCGLenum target, long long size, GCGL
         synthesizeGLError(GraphicsContextGL::INVALID_VALUE, "bufferData", "size < 0");
         return;
     }
-    if (size > static_cast<long long>(std::numeric_limits<unsigned>::max())) {
-        // Trying to allocate too large buffers cause unexpected context loss. Better to disallow
-        // it in validation.
-        synthesizeGLError(GraphicsContextGL::INVALID_VALUE, "bufferData", "size more than 32-bits");
-        return;
-    }
-#if !USE(ANGLE)
     if (!buffer->associateBufferData(static_cast<GCGLsizeiptr>(size))) {
         synthesizeGLError(GraphicsContextGL::INVALID_VALUE, "bufferData", "invalid buffer");
         return;
     }
+
     m_context->moveErrorsToSyntheticErrorList();
-#endif
     m_context->bufferData(target, static_cast<GCGLsizeiptr>(size), usage);
-#if !USE(ANGLE)
     if (m_context->moveErrorsToSyntheticErrorList()) {
         // The bufferData function failed. Tell the buffer it doesn't have the data it thinks it does.
         buffer->disassociateBufferData();
     }
-#endif
 }
 
 void WebGLRenderingContextBase::bufferData(GCGLenum target, std::optional<BufferDataSource>&& data, GCGLenum usage)
@@ -1878,21 +1869,17 @@ void WebGLRenderingContextBase::bufferData(GCGLenum target, std::optional<Buffer
         return;
 
     std::visit([&](auto& data) {
-#if !USE(ANGLE)
         if (!buffer->associateBufferData(data.get())) {
             this->synthesizeGLError(GraphicsContextGL::INVALID_VALUE, "bufferData", "invalid buffer");
             return;
         }
 
         m_context->moveErrorsToSyntheticErrorList();
-#endif
         m_context->bufferData(target, GCGLSpan<const GCGLvoid>(data->data(), data->byteLength()), usage);
-#if !USE(ANGLE)
         if (m_context->moveErrorsToSyntheticErrorList()) {
             // The bufferData function failed. Tell the buffer it doesn't have the data it thinks it does.
             buffer->disassociateBufferData();
         }
-#endif
     }, data.value());
 }
 
@@ -1909,20 +1896,17 @@ void WebGLRenderingContextBase::bufferSubData(GCGLenum target, long long offset,
     }
 
     std::visit([&](auto& data) {
-#if !USE(ANGLE)
         if (!buffer->associateBufferSubData(static_cast<GCGLintptr>(offset), data.get())) {
             this->synthesizeGLError(GraphicsContextGL::INVALID_VALUE, "bufferSubData", "offset out of range");
             return;
         }
+
         m_context->moveErrorsToSyntheticErrorList();
-#endif
         m_context->bufferSubData(target, static_cast<GCGLintptr>(offset), GCGLSpan<const GCGLvoid>(data->data(), data->byteLength()));
-#if !USE(ANGLE)
         if (m_context->moveErrorsToSyntheticErrorList()) {
             // The bufferSubData function failed. Tell the buffer it doesn't have the data it thinks it does.
             buffer->disassociateBufferData();
         }
-#endif
     }, data);
 }
 
@@ -2509,7 +2493,6 @@ bool WebGLRenderingContextBase::validateVertexArrayObject(const char* functionNa
     return true;
 }
 
-#if !USE(ANGLE)
 bool WebGLRenderingContextBase::validateElementArraySize(GCGLsizei count, GCGLenum type, GCGLintptr offset)
 {
     RefPtr<WebGLBuffer> elementArrayBuffer = m_boundVertexArrayObject->getElementArrayBuffer();
@@ -2549,9 +2532,7 @@ bool WebGLRenderingContextBase::validateElementArraySize(GCGLsizei count, GCGLen
     }
     return true;
 }
-#endif
 
-#if !USE(ANGLE)
 bool WebGLRenderingContextBase::validateIndexArrayPrecise(GCGLsizei count, GCGLenum type, GCGLintptr offset, unsigned& numElementsRequired)
 {
     ASSERT(count >= 0 && offset >= 0);
@@ -2590,11 +2571,13 @@ bool WebGLRenderingContextBase::validateIndexArrayPrecise(GCGLsizei count, GCGLe
     numElementsRequired = checkedNumElementsRequired.value();
     return true;
 }
-#endif
 
-#if !USE(ANGLE)
 bool WebGLRenderingContextBase::validateVertexAttributes(unsigned elementCount, unsigned primitiveCount)
 {
+#if USE(ANGLE)
+    UNUSED_PARAM(elementCount);
+    UNUSED_PARAM(primitiveCount);
+#else
     if (!m_currentProgram)
         return false;
 
@@ -2662,9 +2645,10 @@ bool WebGLRenderingContextBase::validateVertexAttributes(unsigned elementCount, 
             return false;
         }
     }
+#endif
+
     return true;
 }
-#endif
 
 bool WebGLRenderingContextBase::validateWebGLObject(const char* functionName, WebGLObject* object)
 {
@@ -2744,11 +2728,12 @@ bool WebGLRenderingContextBase::validateDrawArrays(const char* functionName, GCG
         synthesizeGLError(GraphicsContextGL::INVALID_OPERATION, functionName, "attempt to access out of bounds arrays");
         return false;
     }
-
+#if !USE(ANGLE)
     if (!validateSimulatedVertexAttrib0(checkedSum.value() - 1)) {
         synthesizeGLError(GraphicsContextGL::INVALID_OPERATION, functionName, "attempt to access outside the bounds of the simulated vertexAttrib0 array");
         return false;
     }
+#endif
 
     const char* reason = "framebuffer incomplete";
     if (m_framebufferBinding && !m_framebufferBinding->onAccess(graphicsContextGL(), &reason)) {
@@ -2758,9 +2743,7 @@ bool WebGLRenderingContextBase::validateDrawArrays(const char* functionName, GCG
 
     return true;
 }
-#endif
 
-#if !USE(ANGLE)
 bool WebGLRenderingContextBase::validateDrawElements(const char* functionName, GCGLenum mode, GCGLsizei count, GCGLenum type, long long offset, unsigned& numElements, GCGLsizei primitiveCount)
 {
     if (isContextLostOrPending() || !validateDrawMode(functionName, mode))
@@ -2825,10 +2808,12 @@ bool WebGLRenderingContextBase::validateDrawElements(const char* functionName, G
         }
     }
 
+#if !USE(ANGLE)
     if (!validateSimulatedVertexAttrib0(numElements)) {
         synthesizeGLError(GraphicsContextGL::INVALID_OPERATION, functionName, "attempt to access outside the bounds of the simulated vertexAttrib0 array");
         return false;
     }
+#endif
     
     const char* reason = "framebuffer incomplete";
     if (m_framebufferBinding && !m_framebufferBinding->onAccess(graphicsContextGL(), &reason)) {
@@ -3105,7 +3090,7 @@ RefPtr<WebGLActiveInfo> WebGLRenderingContextBase::getActiveAttrib(WebGLProgram&
 {
     if (!validateWebGLProgramOrShader("getActiveAttrib", &program))
         return nullptr;
-    GraphicsContextGLActiveInfo info;
+    GraphicsContextGL::ActiveInfo info;
     if (!m_context->getActiveAttrib(program.object(), index, info))
         return nullptr;
 
@@ -3118,7 +3103,7 @@ RefPtr<WebGLActiveInfo> WebGLRenderingContextBase::getActiveUniform(WebGLProgram
 {
     if (!validateWebGLProgramOrShader("getActiveUniform", &program))
         return nullptr;
-    GraphicsContextGLActiveInfo info;
+    GraphicsContextGL::ActiveInfo info;
     if (!m_context->getActiveUniform(program.object(), index, info))
         return nullptr;
     // FIXME: Do we still need this for the ANGLE backend?
@@ -3959,7 +3944,7 @@ RefPtr<WebGLUniformLocation> WebGLRenderingContextBase::getUniformLocation(WebGL
     static_cast<GraphicsContextGLOpenGL*>(m_context.get())->getNonBuiltInActiveSymbolCount(program.object(), GraphicsContextGL::ACTIVE_UNIFORMS, &activeUniforms);
 #endif
     for (GCGLint i = 0; i < activeUniforms; i++) {
-        GraphicsContextGLActiveInfo info;
+        GraphicsContextGL::ActiveInfo info;
         if (!m_context->getActiveUniform(program.object(), i, info))
             return nullptr;
         // Strip "[0]" from the name if it's an array.
@@ -5250,7 +5235,7 @@ void WebGLRenderingContextBase::texImageArrayBufferViewHelper(TexImageFunctionID
 
     Vector<uint8_t> tempData;
     bool changeUnpackParams = false;
-    if (data->data() && width && height
+    if (data->data && width && height
         && (m_unpackFlipY || m_unpackPremultiplyAlpha)) {
         ASSERT(sourceType == TexImageDimension::Tex2D);
         // Only enter here if width or height is non-zero. Otherwise, call to the
@@ -5372,7 +5357,7 @@ void WebGLRenderingContextBase::texImage2DBase(GCGLenum target, GCGLint level, G
     ASSERT(validateTexFuncParameters("texImage2D", TexImageFunctionType::TexImage, SourceArrayBufferView, target, level, internalFormat, width, height, 1, border, format, type));
     ASSERT(tex);
     ASSERT(validateNPOTTextureLevel(width, height, level, "texImage2D"));
-    if (!pixels.data()) {
+    if (!pixels.data) {
         if (!static_cast<GraphicsContextGLOpenGL*>(m_context.get())->texImage2DResourceSafe(target, level, internalFormat, width, height, border, format, type, m_unpackAlignment))
             return;
     } else {
@@ -6334,7 +6319,7 @@ void WebGLRenderingContextBase::uniform1iv(const WebGLUniformLocation* location,
 
 #if !USE(ANGLE)
     if (location->type() == GraphicsContextGL::SAMPLER_2D || location->type() == GraphicsContextGL::SAMPLER_CUBE) {
-        for (size_t i = 0; i < data.size(); ++i) {
+        for (size_t i = 0; i < data.bufSize; ++i) {
             if (data[i] >= static_cast<int>(m_textureUnits.size())) {
                 LOG(WebGL, "Texture unit size=%zu, v[%zu]=%d. Location type = %04X.", m_textureUnits.size(), i, data[i], location->type());
                 synthesizeGLError(GraphicsContextGL::INVALID_VALUE, "uniform1iv", "invalid texture unit");

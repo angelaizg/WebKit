@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FormattingState.h"
 #include <wtf/HashSet.h>
 #include <wtf/IsoMalloc.h>
@@ -57,3 +59,4 @@ private:
 
 SPECIALIZE_TYPE_TRAITS_LAYOUT_FORMATTING_STATE(BlockFormattingState, isBlockFormattingState())
 
+#endif

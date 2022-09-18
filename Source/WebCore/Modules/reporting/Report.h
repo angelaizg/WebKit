@@ -25,14 +25,11 @@
 
 #pragma once
 
-#include <wtf/JSONValues.h>
 #include "ReportBody.h"
 #include <wtf/RefCounted.h>
 #include <wtf/text/WTFString.h>
 
 namespace WebCore {
-
-class FormData;
 
 class WEBCORE_EXPORT Report : public RefCounted<Report> {
     WTF_MAKE_ISO_ALLOCATED(Report);
@@ -44,8 +41,6 @@ public:
     const AtomString& type() const;
     const String& url() const;
     const RefPtr<ReportBody>& body();
-
-    static Ref<FormData> createReportFormDataForViolation(const String& type, const URL&, const String& userAgent, const Function<void(JSON::Object&)>& populateBody);
 
     template<typename Encoder> void WEBCORE_EXPORT encode(Encoder&) const;
     template<typename Decoder> static WEBCORE_EXPORT std::optional<Ref<WebCore::Report>> decode(Decoder&);

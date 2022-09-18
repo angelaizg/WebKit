@@ -37,7 +37,6 @@ struct DragState {
     bool shouldDispatchEvents;
     OptionSet<DragSourceAction> type; // Should be std::optional<>. See bug 213086.
     RefPtr<DataTransfer> dataTransfer; // Used on only the source side of dragging.
-    RefPtr<SecurityOrigin> restrictedOriginForImageData;
 };
 
 } // namespace WebCore

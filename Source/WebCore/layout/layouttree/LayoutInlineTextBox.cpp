@@ -26,6 +26,8 @@
 #include "config.h"
 #include "LayoutInlineTextBox.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "RenderStyle.h"
 #include <wtf/IsoMallocInlines.h>
 
@@ -46,3 +48,4 @@ InlineTextBox::InlineTextBox(String content, bool canUseSimplifiedContentMeasuri
 }
 }
 
+#endif

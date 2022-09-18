@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FlexFormattingState.h"
 #include "LayoutIntegrationBoxTree.h"
 #include "LayoutState.h"
@@ -78,3 +80,4 @@ private:
 }
 }
 
+#endif

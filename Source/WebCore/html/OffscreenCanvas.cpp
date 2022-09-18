@@ -68,7 +68,7 @@ RefPtr<ImageBuffer> DetachedOffscreenCanvas::takeImageBuffer()
     return WTFMove(m_buffer);
 }
 
-WeakPtr<HTMLCanvasElement, WeakPtrImplWithEventTargetData> DetachedOffscreenCanvas::takePlaceholderCanvas()
+WeakPtr<HTMLCanvasElement> DetachedOffscreenCanvas::takePlaceholderCanvas()
 {
     ASSERT(isMainThread());
     return std::exchange(m_placeholderCanvas, nullptr);
@@ -447,10 +447,8 @@ void OffscreenCanvas::commitToPlaceholderCanvas()
         return;
 
     // FIXME: Transfer texture over if we're using accelerated compositing
-    if (m_context && (m_context->isWebGL() || m_context->isAccelerated())) {
-        m_context->prepareForDisplayWithPaint();
+    if (m_context && (m_context->isWebGL() || m_context->isAccelerated()))
         m_context->paintRenderingResultsToCanvas();
-    }
 
     if (m_placeholderData->bufferPipeSource) {
         if (auto bufferCopy = imageBuffer->clone())

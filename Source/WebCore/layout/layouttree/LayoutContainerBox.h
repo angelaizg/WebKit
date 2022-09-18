@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutBox.h"
 #include <wtf/IsoMalloc.h>
 #include <wtf/UniqueRef.h>
@@ -68,3 +70,4 @@ private:
 
 SPECIALIZE_TYPE_TRAITS_LAYOUT_BOX(ContainerBox, isContainerBox())
 
+#endif

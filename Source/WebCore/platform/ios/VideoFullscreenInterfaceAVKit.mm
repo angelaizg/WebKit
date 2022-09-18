@@ -483,10 +483,6 @@ static const NSTimeInterval startPictureInPictureTimeInterval = 1.0;
 
 - (void)tryToStartPictureInPicture MY_NO_RETURN
 {
-#if PLATFORM(WATCHOS)
-    UNUSED_VARIABLE(startPictureInPictureTimeInterval);
-    ASSERT_NOT_REACHED();
-#else
     if (_startPictureInPictureTimer)
         return;
 
@@ -505,7 +501,6 @@ static const NSTimeInterval startPictureInPictureTimeInterval = 1.0;
     }];
 
     [self initObserver];
-#endif
 }
 
 - (void)startPictureInPicture MY_NO_RETURN

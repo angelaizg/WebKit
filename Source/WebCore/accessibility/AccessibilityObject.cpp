@@ -36,7 +36,6 @@
 #include "AccessibilityTable.h"
 #include "Chrome.h"
 #include "ChromeClient.h"
-#include "CustomElementDefaultARIA.h"
 #include "DOMTokenList.h"
 #include "DocumentInlines.h"
 #include "Editing.h"
@@ -1462,10 +1461,9 @@ bool AccessibilityObject::replacedNodeNeedsCharacter(Node* replacedNode)
         return false;
 
     // create an AX object, but skip it if it is not supposed to be seen
-    if (auto* cache = replacedNode->renderer()->document().axObjectCache()) {
-        if (auto* axObject = cache->getOrCreate(replacedNode))
-            return !axObject->accessibilityIsIgnored();
-    }
+    AccessibilityObject* object = replacedNode->renderer()->document().axObjectCache()->getOrCreate(replacedNode);
+    if (object->accessibilityIsIgnored())
+        return false;
 
     return true;
 }
@@ -1565,6 +1563,86 @@ String AccessibilityObject::stringForVisiblePositionRange(const VisiblePositionR
     return builder.toString();
 }
 
+int AccessibilityObject::lengthForVisiblePositionRange(const VisiblePositionRange& visiblePositionRange) const
+{
+    // FIXME: Multi-byte support
+
+    auto range = makeSimpleRange(visiblePositionRange);
+    if (!range)
+        return -1; // FIXME: Why not return 0?
+
+    // FIXME: Use characterCount instead of writing our own loop?
+    int length = 0;
+    for (TextIterator it(*range); !it.atEnd(); it.advance()) {
+        // non-zero length means textual node, zero length means replaced node (AKA "attachments" in AX)
+        if (it.text().length())
+            length += it.text().length();
+        else {
+            if (replacedNodeNeedsCharacter(it.node()))
+                ++length;
+        }
+    }
+    return length;
+}
+
+VisiblePosition AccessibilityObject::visiblePositionForBounds(const IntRect& rect, AccessibilityVisiblePositionForBounds visiblePositionForBounds) const
+{
+    if (rect.isEmpty())
+        return VisiblePosition();
+    
+    auto* mainFrame = this->mainFrame();
+    if (!mainFrame)
+        return VisiblePosition();
+    
+    // FIXME: Add support for right-to-left languages.
+    IntPoint corner = (visiblePositionForBounds == AccessibilityVisiblePositionForBounds::First) ? rect.minXMinYCorner() : rect.maxXMaxYCorner();
+    VisiblePosition position = mainFrame->visiblePositionForPoint(corner);
+    
+    if (rect.contains(position.absoluteCaretBounds().center()))
+        return position;
+    
+    // If the initial position is located outside the bounds adjust it incrementally as needed.
+    VisiblePosition nextPosition = position.next();
+    VisiblePosition previousPosition = position.previous();
+    while (nextPosition.isNotNull() || previousPosition.isNotNull()) {
+        if (rect.contains(nextPosition.absoluteCaretBounds().center()))
+            return nextPosition;
+        if (rect.contains(previousPosition.absoluteCaretBounds().center()))
+            return previousPosition;
+        
+        nextPosition = nextPosition.next();
+        previousPosition = previousPosition.previous();
+    }
+    
+    return VisiblePosition();
+}
+
+VisiblePosition AccessibilityObject::nextWordEnd(const VisiblePosition& visiblePos) const
+{
+    if (visiblePos.isNull())
+        return VisiblePosition();
+
+    // make sure we move off of a word end
+    VisiblePosition nextVisiblePos = visiblePos.next();
+    if (nextVisiblePos.isNull())
+        return VisiblePosition();
+
+    return endOfWord(nextVisiblePos, LeftWordIfOnBoundary);
+}
+
+VisiblePosition AccessibilityObject::previousWordStart(const VisiblePosition& visiblePos) const
+{
+    if (visiblePos.isNull())
+        return VisiblePosition();
+
+    // make sure we move off of a word start
+    VisiblePosition prevVisiblePos = visiblePos.previous();
+    if (prevVisiblePos.isNull())
+        return VisiblePosition();
+
+    return startOfWord(prevVisiblePos, RightWordIfOnBoundary);
+}
+
 VisiblePosition AccessibilityObject::nextLineEndPosition(const VisiblePosition& visiblePos) const
 {
     if (visiblePos.isNull())
@@ -1652,6 +1730,18 @@ VisiblePosition AccessibilityObject::previousParagraphStartPosition(const Visibl
     return startOfParagraph(position.previous());
 }
 
+AccessibilityObject* AccessibilityObject::accessibilityObjectForPosition(const VisiblePosition& visiblePos) const
+{
+    if (visiblePos.isNull())
+        return nullptr;
+
+    RenderObject* obj = visiblePos.deepEquivalent().deprecatedNode()->renderer();
+    if (!obj)
+        return nullptr;
+
+    return obj->document().axObjectCache()->getOrCreate(obj);
+}
+    
 // If you call node->hasEditableStyle() since that will return true if an ancestor is editable.
 // This only returns true if this is the element that actually has the contentEditable attribute set.
 bool AccessibilityObject::hasContentEditableAttributeSet() const
@@ -2259,28 +2349,17 @@ bool AccessibilityObject::hasTagName(const QualifiedName& tagName) const
     
 bool AccessibilityObject::hasAttribute(const QualifiedName& attribute) const
 {
-    RefPtr element = this->element();
-    if (!element)
+    Node* node = this->node();
+    if (!is<Element>(node))
         return false;
-
-    if (element->hasAttributeWithoutSynchronization(attribute))
-        return true;
-
-    if (auto* defaultARIA = element->customElementDefaultARIAIfExists())
-        return defaultARIA->hasAttribute(attribute);
-
-    return false;
+    
+    return downcast<Element>(*node).hasAttributeWithoutSynchronization(attribute);
 }
     
 const AtomString& AccessibilityObject::getAttribute(const QualifiedName& attribute) const
 {
-    if (RefPtr element = this->element()) {
-        auto& value = element->attributeWithoutSynchronization(attribute);
-        if (!value.isNull())
-            return value;
-        if (auto* defaultARIA = element->customElementDefaultARIAIfExists())
-            return defaultARIA->valueForAttribute(attribute);
-    }
+    if (auto* element = this->element())
+        return element->attributeWithoutSynchronization(attribute);
     return nullAtom();
 }
 
@@ -2475,7 +2554,6 @@ static void initializeRoleMap()
         { "main"_s, AccessibilityRole::LandmarkMain },
         { "marquee"_s, AccessibilityRole::ApplicationMarquee },
         { "math"_s, AccessibilityRole::DocumentMath },
-        { "mark"_s, AccessibilityRole::Mark },
         { "menu"_s, AccessibilityRole::Menu },
         { "menubar"_s, AccessibilityRole::MenuBar },
         { "menuitem"_s, AccessibilityRole::MenuItem },
@@ -3060,19 +3138,17 @@ String AccessibilityObject::identifierAttribute() const
     return getAttribute(idAttr);
 }
 
-Vector<String> AccessibilityObject::classList() const
+void AccessibilityObject::classList(Vector<String>& classList) const
 {
-    auto* element = this->element();
-    if (!element)
-        return { };
-
-    auto& domClassList = element->classList();
-    Vector<String> classList;
-    unsigned length = domClassList.length();
-    classList.reserveInitialCapacity(length);
+    Node* node = this->node();
+    if (!is<Element>(node))
+        return;
+    
+    Element* element = downcast<Element>(node);
+    DOMTokenList& list = element->classList();
+    unsigned length = list.length();
     for (unsigned k = 0; k < length; k++)
-        classList.append(domClassList.item(k).string());
-    return classList;
+        classList.append(list.item(k).string());
 }
 
 bool AccessibilityObject::supportsPressed() const

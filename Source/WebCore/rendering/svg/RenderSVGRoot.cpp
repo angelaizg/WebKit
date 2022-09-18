@@ -240,7 +240,10 @@ bool RenderSVGRoot::shouldApplyViewportClip() const
     // the outermost svg is clipped if auto, and svg document roots are always clipped
     // When the svg is stand-alone (isDocumentElement() == true) the viewport clipping should always
     // be applied, noting that the window scrollbars should be hidden if overflow=hidden.
-    return isNonVisibleOverflow(effectiveOverflowX()) || style().overflowX() == Overflow::Auto || this->isDocumentElementRenderer();
+    return effectiveOverflowX() == Overflow::Hidden
+        || style().overflowX() == Overflow::Auto
+        || style().overflowX() == Overflow::Scroll
+        || this->isDocumentElementRenderer();
 }
 
 // FIXME: Basically a copy of RenderBlock::paint() - ideally one would share this code.

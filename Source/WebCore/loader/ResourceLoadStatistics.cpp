@@ -375,49 +375,49 @@ static void appendHashSet(StringBuilder& builder, const String& label, const Has
         builder.append("        ", entry, '\n');
 }
 
-static ASCIILiteral navigatorAPIEnumToString(NavigatorAPIsAccessed navigatorEnum)
+static ASCIILiteral navigatorAPIEnumToString(ResourceLoadStatistics::NavigatorAPI navigatorEnum)
 {
     switch (navigatorEnum) {
-    case NavigatorAPIsAccessed::MimeTypes:
+    case ResourceLoadStatistics::NavigatorAPI::MimeTypes:
         return "mimeTypes"_s;
-    case NavigatorAPIsAccessed::CookieEnabled:
+    case ResourceLoadStatistics::NavigatorAPI::CookieEnabled:
         return "cookieEnabled"_s;
-    case NavigatorAPIsAccessed::Plugins:
+    case ResourceLoadStatistics::NavigatorAPI::Plugins:
         return "plugins"_s;
-    case NavigatorAPIsAccessed::UserAgent:
+    case ResourceLoadStatistics::NavigatorAPI::UserAgent:
         return "userAgent"_s;
-    case NavigatorAPIsAccessed::AppVersion:
+    case ResourceLoadStatistics::NavigatorAPI::AppVersion:
         return "appVersion"_s;
     }
     ASSERT_NOT_REACHED();
     return "Invalid navigator API"_s;
 }
 
-static ASCIILiteral screenAPIEnumToString(ScreenAPIsAccessed screenEnum)
+static ASCIILiteral screenAPIEnumToString(ResourceLoadStatistics::ScreenAPI screenEnum)
 {
     switch (screenEnum) {
-    case ScreenAPIsAccessed::Height:
+    case ResourceLoadStatistics::ScreenAPI::Height:
         return "height"_s;
-    case ScreenAPIsAccessed::Width:
+    case ResourceLoadStatistics::ScreenAPI::Width:
         return "width"_s;
-    case ScreenAPIsAccessed::ColorDepth:
+    case ResourceLoadStatistics::ScreenAPI::ColorDepth:
         return "colorDepth"_s;
-    case ScreenAPIsAccessed::PixelDepth:
+    case ResourceLoadStatistics::ScreenAPI::PixelDepth:
         return "pixelDepth"_s;
-    case ScreenAPIsAccessed::AvailLeft:
+    case ResourceLoadStatistics::ScreenAPI::AvailLeft:
         return "availLeft"_s;
-    case ScreenAPIsAccessed::AvailTop:
+    case ResourceLoadStatistics::ScreenAPI::AvailTop:
         return "availTop"_s;
-    case ScreenAPIsAccessed::AvailHeight:
+    case ResourceLoadStatistics::ScreenAPI::AvailHeight:
         return "availHeight"_s;
-    case ScreenAPIsAccessed::AvailWidth:
+    case ResourceLoadStatistics::ScreenAPI::AvailWidth:
         return "availWidth"_s;
     }
     ASSERT_NOT_REACHED();
     return "Invalid screen API"_s;
 }
     
-static void appendNavigatorAPIOptionSet(StringBuilder& builder, const OptionSet<NavigatorAPIsAccessed>& optionSet)
+static void appendNavigatorAPIOptionSet(StringBuilder& builder, const OptionSet<ResourceLoadStatistics::NavigatorAPI>& optionSet)
 {
     if (optionSet.isEmpty())
         return;
@@ -426,7 +426,7 @@ static void appendNavigatorAPIOptionSet(StringBuilder& builder, const OptionSet<
         builder.append("        ", navigatorAPIEnumToString(navigatorAPI), '\n');
 }
     
-static void appendScreenAPIOptionSet(StringBuilder& builder, const OptionSet<ScreenAPIsAccessed>& optionSet)
+static void appendScreenAPIOptionSet(StringBuilder& builder, const OptionSet<ResourceLoadStatistics::ScreenAPI>& optionSet)
 {
     if (optionSet.isEmpty())
         return;

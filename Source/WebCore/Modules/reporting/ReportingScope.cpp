@@ -27,14 +27,9 @@
 #include "ReportingScope.h"
 
 #include "ContextDestructionObserver.h"
-#include "Document.h"
 #include "HeaderFieldTokenizer.h"
-#include "Report.h"
 #include "ReportingObserver.h"
 #include "ScriptExecutionContext.h"
-#include "SecurityOrigin.h"
-#include "TestReportBody.h"
-#include <wtf/IsoMallocInlines.h>
 #include <wtf/text/StringParsingBuffer.h>
 
 namespace WebCore {
@@ -159,20 +154,6 @@ MemoryCompactRobinHoodHashMap<String, String> ReportingScope::parseReportingEndp
 String ReportingScope::endpointURIForToken(const String& reportTo) const
 {
     return m_reportingEndpoints.get(reportTo);
-}
-
-void ReportingScope::generateTestReport(String&& message, String&& group)
-{
-    UNUSED_PARAM(group);
-
-    String reportURL { ""_s };
-    if (auto* document = dynamicDowncast<Document>(scriptExecutionContext()))
-        reportURL = document->url().strippedForUseAsReferrer();
-
-    // https://w3c.github.io/reporting/#generate-test-report-command, step 7.1.10.
-    notifyReportObservers(Report::create(TestReportBody::testReportType(), WTFMove(reportURL), TestReportBody::create(WTFMove(message))));
-
-    // FIXME(244907): We should call sendReportToEndpoints here.
 }
 
 } // namespace WebCore

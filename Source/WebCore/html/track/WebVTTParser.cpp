@@ -119,10 +119,6 @@ void WebVTTParser::parseFileHeader(String&& data)
     m_lineReader.reset();
     m_lineReader.append(WTFMove(data));
     parse();
-    if (!m_regionList.isEmpty())
-        m_client.newRegionsParsed();
-    if (!m_styleSheets.isEmpty())
-        m_client.newStyleSheetsParsed();
 }
 
 void WebVTTParser::parseBytes(const uint8_t* data, unsigned length)

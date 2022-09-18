@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FormattingState.h"
 #include "InlineDisplayBox.h"
 #include "InlineDisplayLine.h"
@@ -105,3 +107,4 @@ inline void InlineFormattingState::shrinkToFit()
 
 SPECIALIZE_TYPE_TRAITS_LAYOUT_FORMATTING_STATE(InlineFormattingState, isInlineFormattingState())
 
+#endif

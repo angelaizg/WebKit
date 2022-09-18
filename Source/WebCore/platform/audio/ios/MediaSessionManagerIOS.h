@@ -54,8 +54,6 @@ public:
     static WEBCORE_EXPORT void providePresentingApplicationPID();
 
     using MediaSessionHelperClient::weakPtrFactory;
-    using MediaSessionHelperClient::WeakValueType;
-    using MediaSessionHelperClient::WeakPtrImplType;
 
 private:
     friend class PlatformMediaSessionManager;

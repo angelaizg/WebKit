@@ -42,7 +42,6 @@
 #include <mutex>
 #include <wtf/CrossThreadQueue.h>
 #include <wtf/CrossThreadTask.h>
-#include <wtf/HashCountedSet.h>
 #include <wtf/HashMap.h>
 #include <wtf/MainThread.h>
 #include <wtf/RefPtr.h>
@@ -58,19 +57,8 @@ static ThreadSpecific<BlobUrlOriginMap>& originMap()
 {
     static std::once_flag onceFlag;
     static ThreadSpecific<BlobUrlOriginMap>* map;
-    std::call_once(onceFlag, [] {
+    std::call_once(onceFlag, []{
         map = new ThreadSpecific<BlobUrlOriginMap>;
-    });
-
-    return *map;
-}
-
-static ThreadSpecific<HashCountedSet<String>>& blobURLReferencesMap()
-{
-    static std::once_flag onceFlag;
-    static ThreadSpecific<HashCountedSet<String>>* map;
-    std::call_once(onceFlag, [] {
-        map = new ThreadSpecific<HashCountedSet<String>>;
     });
 
     return *map;
@@ -111,24 +99,11 @@ static inline bool isBlobURLContainsNullOrigin(const URL& url)
     return StringView(url.string()).substring(startIndex, endIndex - startIndex - 1) == "null"_s;
 }
 
-static void unregisterBlobURLOriginIfNecessary(const URL& url)
-{
-    if (!isBlobURLContainsNullOrigin(url))
-        return;
-
-    auto urlWithoutFragment = url.stringWithoutFragmentIdentifier();
-    if (blobURLReferencesMap()->remove(urlWithoutFragment))
-        originMap()->remove(urlWithoutFragment);
-}
-
 void ThreadableBlobRegistry::registerBlobURL(SecurityOrigin* origin, PolicyContainer&& policyContainer, const URL& url, const URL& srcURL)
 {
     // If the blob URL contains null origin, as in the context with unique security origin or file URL, save the mapping between url and origin so that the origin can be retrived when doing security origin check.
-    if (origin && isBlobURLContainsNullOrigin(url)) {
-        auto urlWithoutFragment = url.stringWithoutFragmentIdentifier();
-        originMap()->add(urlWithoutFragment, origin);
-        blobURLReferencesMap()->add(urlWithoutFragment);
-    }
+    if (origin && isBlobURLContainsNullOrigin(url))
+        originMap()->add<StringViewHashTranslator>(url.viewWithoutFragmentIdentifier(), origin);
 
     if (isMainThread()) {
         blobRegistry().registerBlobURL(url, srcURL, policyContainer);
@@ -177,7 +152,8 @@ unsigned long long ThreadableBlobRegistry::blobSize(const URL& url)
 
 void ThreadableBlobRegistry::unregisterBlobURL(const URL& url)
 {
-    unregisterBlobURLOriginIfNecessary(url);
+    if (isBlobURLContainsNullOrigin(url))
+        originMap()->remove<StringViewHashTranslator>(url.viewWithoutFragmentIdentifier());
 
     ensureOnMainThread([url = url.isolatedCopy()] {
         blobRegistry().unregisterBlobURL(url);
@@ -186,9 +162,6 @@ void ThreadableBlobRegistry::unregisterBlobURL(const URL& url)
 
 void ThreadableBlobRegistry::registerBlobURLHandle(const URL& url)
 {
-    if (isBlobURLContainsNullOrigin(url))
-        blobURLReferencesMap()->add(url.stringWithoutFragmentIdentifier());
-
     ensureOnMainThread([url = url.isolatedCopy()] {
         blobRegistry().registerBlobURLHandle(url);
     });
@@ -196,8 +169,6 @@ void ThreadableBlobRegistry::registerBlobURLHandle(const URL& url)
 
 void ThreadableBlobRegistry::unregisterBlobURLHandle(const URL& url)
 {
-    unregisterBlobURLOriginIfNecessary(url);
-
     ensureOnMainThread([url = url.isolatedCopy()] {
         blobRegistry().unregisterBlobURLHandle(url);
     });
@@ -211,8 +182,8 @@ RefPtr<SecurityOrigin> ThreadableBlobRegistry::getCachedOrigin(const URL& url)
     if (!url.protocolIsBlob() || !isBlobURLContainsNullOrigin(url))
         return nullptr;
 
-    // If we do not have a cached origin for null blob URLs, we use an opaque origin.
-    return SecurityOrigin::createOpaque();
+    // If we do not have a cached origin for null blob URLs, we use a unique origin.
+    return SecurityOrigin::createUnique();
 }
 
 } // namespace WebCore

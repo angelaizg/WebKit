@@ -34,7 +34,7 @@
 namespace WebCore {
 
 LayerAncestorClippingStack::LayerAncestorClippingStack(Vector<CompositedClipData>&& clipDataStack)
-    : m_stack(WTF::map(WTFMove(clipDataStack), [](auto&& clipDataEntry) { return ClippingStackEntry { WTFMove(clipDataEntry), 0, nullptr, nullptr }; }))
+    : m_stack(WTF::map(WTFMove(clipDataStack), [](auto&& clipDataEntry) { return ClippingStackEntry { WTFMove(clipDataEntry), 0, nullptr }; }))
 {
 }
 
@@ -84,14 +84,14 @@ void LayerAncestorClippingStack::detachFromScrollingCoordinator(ScrollingCoordin
     }
 }
 
-GraphicsLayer* LayerAncestorClippingStack::firstLayer() const
+GraphicsLayer* LayerAncestorClippingStack::firstClippingLayer() const
 {
-    return m_stack.first().childForSuperlayers();
+    return m_stack.first().clippingLayer.get();
 }
 
-GraphicsLayer* LayerAncestorClippingStack::lastLayer() const
+GraphicsLayer* LayerAncestorClippingStack::lastClippingLayer() const
 {
-    return m_stack.last().parentForSublayers();
+    return m_stack.last().clippingLayer.get();
 }
 
 ScrollingNodeID LayerAncestorClippingStack::lastOverflowScrollProxyNodeID() const
@@ -110,7 +110,7 @@ void LayerAncestorClippingStack::updateScrollingNodeLayers(ScrollingCoordinator&
         if (!entry.clipData.isOverflowScroll)
             continue;
 
-        scrollingCoordinator.setNodeLayers(entry.overflowScrollProxyNodeID, { entry.scrollingLayer.get() });
+        scrollingCoordinator.setNodeLayers(entry.overflowScrollProxyNodeID, { entry.clippingLayer.get() });
     }
 }
 
@@ -124,7 +124,7 @@ bool LayerAncestorClippingStack::updateWithClipData(ScrollingCoordinator* scroll
         auto& clipDataEntry = clipDataStack[i];
         
         if (i >= stackEntryCount) {
-            m_stack.append({ WTFMove(clipDataEntry), 0, nullptr, nullptr });
+            m_stack.append({ WTFMove(clipDataEntry), 0, nullptr });
             stackChanged = true;
             continue;
         }
@@ -170,15 +170,13 @@ Vector<CompositedClipData> LayerAncestorClippingStack::compositedClipData() cons
 
 static TextStream& operator<<(TextStream& ts, const LayerAncestorClippingStack::ClippingStackEntry& entry)
 {
-    ts.dumpProperty("clippingLayer", entry.clipData.clippingLayer.get());
+    ts.dumpProperty("layer", entry.clipData.clippingLayer.get());
     ts.dumpProperty("clip", entry.clipData.clipRect);
     ts.dumpProperty("isOverflowScroll", entry.clipData.isOverflowScroll);
     if (entry.overflowScrollProxyNodeID)
         ts.dumpProperty("overflowScrollProxyNodeID", entry.overflowScrollProxyNodeID);
     if (entry.clippingLayer)
         ts.dumpProperty("clippingLayer", entry.clippingLayer->primaryLayerID());
-    if (entry.scrollingLayer)
-        ts.dumpProperty("scrollingLayer", entry.scrollingLayer->primaryLayerID());
     return ts;
 }
 

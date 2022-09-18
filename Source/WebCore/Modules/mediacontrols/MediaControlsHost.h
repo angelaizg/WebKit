@@ -38,7 +38,6 @@ namespace WebCore {
 class AudioTrack;
 class AudioTrackList;
 class Element;
-class WeakPtrImplWithEventTargetData;
 class HTMLElement;
 class HTMLMediaElement;
 class MediaControlTextTrackContainerElement;
@@ -108,7 +107,7 @@ public:
 private:
     explicit MediaControlsHost(HTMLMediaElement&);
 
-    WeakPtr<HTMLMediaElement, WeakPtrImplWithEventTargetData> m_mediaElement;
+    WeakPtr<HTMLMediaElement> m_mediaElement;
     RefPtr<MediaControlTextTrackContainerElement> m_textTrackContainer;
 
 #if ENABLE(MEDIA_CONTROLS_CONTEXT_MENUS)

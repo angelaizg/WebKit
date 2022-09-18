@@ -81,7 +81,6 @@ public:
     bool isRedirected() const { return m_isRedirected; }
     const CertificateInfo& certificateInfo() const { return m_certificateInfo; }
     const String& responseMIMEType() const { return m_responseMIMEType; }
-    ResourceResponse::Tainting responseTainting() const { return m_responseTainting; }
     bool failed() const { return m_failed; }
     ResourceLoaderIdentifier identifier() const { return m_identifier; }
     const ResourceError& error() const { return m_error; }
@@ -138,7 +137,6 @@ private:
     bool m_isRedirected { false };
     bool m_isCOEPEnabled { false };
     ResourceResponse::Source m_responseSource { ResourceResponse::Source::Unknown };
-    ResourceResponse::Tainting m_responseTainting { ResourceResponse::Tainting::Basic };
     ResourceError m_error;
     ScriptExecutionContextIdentifier m_clientIdentifier;
 #if ENABLE(SERVICE_WORKER)

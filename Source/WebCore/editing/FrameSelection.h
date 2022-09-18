@@ -52,7 +52,6 @@ class VisiblePosition;
 
 enum EUserTriggered : bool { NotUserTriggered, UserTriggered };
 enum RevealExtentOption : bool { RevealExtent, DoNotRevealExtent };
-enum ForceCenterScrollOption : bool { DoNotForceCenterScroll, ForceCenterScroll };
 
 class CaretBase {
     WTF_MAKE_NONCOPYABLE(CaretBase);
@@ -129,8 +128,7 @@ public:
         RevealSelectionUpToMainFrame = 1 << 8,
         SmoothScroll = 1 << 9,
         DelegateMainFrameScroll = 1 << 10,
-        RevealSelectionBounds = 1 << 11,
-        ForceCenterScroll = 1 << 12,
+        RevealSelectionBounds = 1 << 11
     };
     static constexpr OptionSet<SetSelectionOption> defaultSetSelectionOptions(EUserTriggered = NotUserTriggered);
 
@@ -270,7 +268,7 @@ public:
 
 private:
     void updateSelectionAppearanceNow();
-    void updateAndRevealSelection(const AXTextStateChangeIntent&, ScrollBehavior = ScrollBehavior::Instant, RevealExtentOption = RevealExtentOption::RevealExtent, ForceCenterScrollOption = ForceCenterScrollOption::DoNotForceCenterScroll);
+    void updateAndRevealSelection(const AXTextStateChangeIntent&, ScrollBehavior = ScrollBehavior::Instant, RevealExtentOption = RevealExtentOption::RevealExtent);
     void updateDataDetectorsForSelection();
 
     bool setSelectionWithoutUpdatingAppearance(const VisibleSelection&, OptionSet<SetSelectionOption>, CursorAlignOnScroll, TextGranularity);
@@ -325,7 +323,7 @@ private:
 
     void updateAssociatedLiveRange();
 
-    WeakPtr<Document, WeakPtrImplWithEventTargetData> m_document;
+    WeakPtr<Document> m_document;
     RefPtr<Range> m_associatedLiveRange;
     std::optional<LayoutUnit> m_xPosForVerticalArrowNavigation;
     VisibleSelection m_selection;

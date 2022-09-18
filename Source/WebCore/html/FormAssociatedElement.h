@@ -120,8 +120,8 @@ private:
     bool isFormAssociatedElement() const final { return true; }
 
     std::unique_ptr<FormAttributeTargetObserver> m_formAttributeTargetObserver;
-    WeakPtr<HTMLFormElement, WeakPtrImplWithEventTargetData> m_form;
-    WeakPtr<HTMLFormElement, WeakPtrImplWithEventTargetData> m_formSetByParser;
+    WeakPtr<HTMLFormElement> m_form;
+    WeakPtr<HTMLFormElement> m_formSetByParser;
     String m_customValidationMessage;
 };
 

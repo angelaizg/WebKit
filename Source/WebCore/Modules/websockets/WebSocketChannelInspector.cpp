@@ -40,8 +40,6 @@ WebSocketChannelInspector::WebSocketChannelInspector(Document& document)
 {
 }
 
-WebSocketChannelInspector::~WebSocketChannelInspector() = default;
-
 void WebSocketChannelInspector::didCreateWebSocket(const URL& url) const
 {
     if (!m_progressIdentifier || !m_document)

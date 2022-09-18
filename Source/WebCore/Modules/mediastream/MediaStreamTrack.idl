@@ -42,7 +42,6 @@ enum MediaStreamTrackState { "live", "ended" };
     [ImplementedAs=mutedForBindings] readonly attribute boolean muted;
     attribute EventHandler onmute;
     attribute EventHandler onunmute;
-    attribute EventHandler onconfigurationchange;
     readonly attribute MediaStreamTrackState readyState;
     attribute EventHandler onended;
 
@@ -72,7 +71,6 @@ enum MediaStreamTrackState { "live", "ended" };
     // FIXME 169871: add channelCount
     DOMString deviceId;
     DOMString groupId;
-    DOMString displaySurface;
 };
 
 [
@@ -92,5 +90,4 @@ enum MediaStreamTrackState { "live", "ended" };
     // FIXME 169871: add channelCount
     DOMString deviceId;
     DOMString groupId;
-    DOMString displaySurface;
 };

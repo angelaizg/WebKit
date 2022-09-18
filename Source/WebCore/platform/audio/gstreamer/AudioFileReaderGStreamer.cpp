@@ -78,7 +78,6 @@ private:
     int m_channels { 0 };
     HashMap<int, GRefPtr<GstBufferList>> m_buffers;
     GRefPtr<GstElement> m_pipeline;
-    std::optional<int> m_firstChannelType;
     unsigned m_channelSize { 0 };
     GRefPtr<GstElement> m_decodebin;
     GRefPtr<GstElement> m_deInterleave;
@@ -142,8 +141,20 @@ AudioFileReader::~AudioFileReader()
     }
 }
 
-static inline std::optional<int> channelTypeFromCaps(GstCaps* caps)
+GstFlowReturn AudioFileReader::handleSample(GstAppSink* sink)
 {
+    auto sample = adoptGRef(gst_app_sink_try_pull_sample(sink, 0));
+    if (!sample)
+        return gst_app_sink_is_eos(sink) ? GST_FLOW_EOS : GST_FLOW_ERROR;
+
+    GstBuffer* buffer = gst_sample_get_buffer(sample.get());
+    if (!buffer)
+        return GST_FLOW_ERROR;
+
+    GstCaps* caps = gst_sample_get_caps(sample.get());
+    if (!caps)
+        return GST_FLOW_ERROR;
+
     int channelId = 0;
     GstAudioInfo info;
     gst_audio_info_from_caps(&info, caps);
@@ -171,44 +182,14 @@ static inline std::optional<int> channelTypeFromCaps(GstCaps* caps)
         break;
     default:
         GST_WARNING("Unhandled channel: %d", GST_AUDIO_INFO_POSITION(&info, 0));
-        return { };
+        return GST_FLOW_ERROR;
     };
-    return channelId;
-}
 
-GstFlowReturn AudioFileReader::handleSample(GstAppSink* sink)
-{
-    auto sample = adoptGRef(gst_app_sink_try_pull_sample(sink, 0));
-    if (!sample)
-        return gst_app_sink_is_eos(sink) ? GST_FLOW_EOS : GST_FLOW_ERROR;
-
-    GstBuffer* buffer = gst_sample_get_buffer(sample.get());
-    if (!buffer)
-        return GST_FLOW_ERROR;
-
-    GstCaps* caps = gst_sample_get_caps(sample.get());
-    if (!caps)
-        return GST_FLOW_ERROR;
-
-    auto channelType = channelTypeFromCaps(caps);
-    if (!channelType)
-        return GST_FLOW_ERROR;
-
-    if (!m_firstChannelType) {
-        ASSERT_NOT_REACHED();
-        return GST_FLOW_ERROR;
-    }
-
-    if (*channelType == *m_firstChannelType) {
-        GstAudioInfo info;
-        gst_audio_info_from_caps(&info, caps);
+    channelId++;
+    if (channelId == 1)
         m_channelSize += gst_buffer_get_size(buffer) / info.bpf;
-    }
 
-    // Shift hash table key values by one, otherwise we would hit an ASSERT here when channelType is
-    // 0 (Left), which is also KeyTraits::emptyValue() which is not allowed.
-    int keyId = *channelType + 1;
-    auto result = m_buffers.ensure(keyId, [] {
+    auto result = m_buffers.ensure(channelId, [] {
         return adoptGRef(gst_buffer_list_new());
     });
     auto& bufferList = result.iterator->value;
@@ -268,12 +249,6 @@ void AudioFileReader::handleNewDeinterleavePad(GstPad* pad)
     // ... deinterleave ! appsink.
     GstElement* sink = makeGStreamerElement("appsink", nullptr);
 
-    if (!m_firstChannelType) {
-        auto caps = adoptGRef(gst_pad_query_caps(pad, nullptr));
-        auto channelType = channelTypeFromCaps(caps.get());
-        if (channelType)
-            m_firstChannelType = WTFMove(channelType);
-    }
     m_channels++;
 
     static GstAppSinkCallbacks callbacks = {
@@ -420,9 +395,8 @@ RefPtr<AudioBus> AudioFileReader::createBus(float sampleRate, bool mixToMono)
     auto audioBus = AudioBus::create(m_channels, m_channelSize, true);
     audioBus->setSampleRate(m_sampleRate);
 
-    for (auto& [key, buffer] : m_buffers)
-        copyGstreamerBuffersToAudioChannel(buffer, audioBus->channelByType(key - 1));
-
+    for (auto& it : m_buffers)
+        copyGstreamerBuffersToAudioChannel(it.value, audioBus->channel(it.key - 1));
     m_buffers.clear();
 
     if (mixToMono)

@@ -33,6 +33,9 @@
 
 #if OS(DARWIN) && !PLATFORM(GTK)
 #include "CommonCryptoUtilities.h"
+extern "C" {
+#include <corecrypto/ccec25519.h>
+}
 #include <wtf/Vector.h>
 
 

@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutRect.h"
 #include "LayoutUnits.h"
 
@@ -319,3 +321,4 @@ inline Rect::operator LayoutRect() const
 
 }
 }
+#endif

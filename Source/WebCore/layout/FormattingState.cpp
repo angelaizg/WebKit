@@ -26,6 +26,8 @@
 #include "config.h"
 #include "FormattingState.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FloatingState.h"
 #include "LayoutBoxGeometry.h"
 #include <wtf/IsoMallocInlines.h>
@@ -58,3 +60,4 @@ BoxGeometry& FormattingState::boxGeometry(const Box& layoutBox)
 
 }
 }
+#endif

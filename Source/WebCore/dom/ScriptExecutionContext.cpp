@@ -743,7 +743,7 @@ static bool isOriginEquivalentToLocal(const SecurityOrigin& origin)
 ScriptExecutionContext::HasResourceAccess ScriptExecutionContext::canAccessResource(ResourceType type) const
 {
     auto* origin = securityOrigin();
-    if (!origin || origin->isOpaque())
+    if (!origin || origin->isUnique())
         return HasResourceAccess::No;
 
     switch (type) {

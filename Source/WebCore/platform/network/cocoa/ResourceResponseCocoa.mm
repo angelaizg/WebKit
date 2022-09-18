@@ -109,7 +109,11 @@ CertificateInfo ResourceResponse::platformCertificateInfo(Span<const std::byte> 
             return { };
     }
 
+#if HAVE(SEC_TRUST_SERIALIZATION)
     return CertificateInfo(trust);
+#else
+    return CertificateInfo(CertificateInfo::certificateChainFromSecTrust(trust));
+#endif
 }
 
 NSURLResponse *ResourceResponse::nsURLResponse() const

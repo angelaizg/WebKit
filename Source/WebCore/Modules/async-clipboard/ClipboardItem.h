@@ -39,7 +39,6 @@ class Clipboard;
 class ClipboardItemDataSource;
 class DeferredPromise;
 class DOMPromise;
-class WeakPtrImplWithEventTargetData;
 class Navigator;
 class PasteboardCustomData;
 class ScriptExecutionContext;
@@ -72,7 +71,7 @@ private:
     ClipboardItem(Vector<KeyValuePair<String, RefPtr<DOMPromise>>>&&, const Options&);
     ClipboardItem(Clipboard&, const PasteboardItemInfo&);
 
-    WeakPtr<Clipboard, WeakPtrImplWithEventTargetData> m_clipboard;
+    WeakPtr<Clipboard> m_clipboard;
     WeakPtr<Navigator> m_navigator;
     std::unique_ptr<ClipboardItemDataSource> m_dataSource;
     PresentationStyle m_presentationStyle { PresentationStyle::Unspecified };

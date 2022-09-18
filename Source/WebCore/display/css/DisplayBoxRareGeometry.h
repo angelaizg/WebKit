@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FloatRoundedRect.h"
 #include "TransformationMatrix.h"
 #include <wtf/IsoMalloc.h>
@@ -61,3 +63,4 @@ FloatRoundedRect roundedInsetBorderForRect(const FloatRect&, const FloatRoundedR
 } // namespace WebCore
 
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

@@ -26,6 +26,8 @@
 #include "config.h"
 #include "DisplayFillLayerImageGeometry.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "DisplayBox.h"
 #include "FillLayer.h"
 #include "LayoutBox.h"
@@ -389,3 +391,4 @@ Vector<FillLayerImageGeometry, 1> calculateFillLayerImageGeometry(const RenderSt
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FormattingContext.h"
 #include "LayoutUnits.h"
 #include <wtf/HashMap.h>
@@ -265,3 +267,4 @@ inline LayoutUnit TableGrid::Column::usedLogicalLeft() const
 }
 }
 
+#endif

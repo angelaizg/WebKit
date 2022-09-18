@@ -39,6 +39,7 @@
 #include "Document.h"
 #include "Event.h"
 #include "SourceBuffer.h"
+#include "SpeechSynthesis.h"
 #include "TextTrackClient.h"
 #include "TextTrackCueList.h"
 #include "TextTrackList.h"
@@ -653,6 +654,18 @@ void TextTrack::newCuesAvailable(const TextTrackCueList& list)
         client.textTrackAddCues(*this, list);
     });
 }
+
+#if ENABLE(SPEECH_SYNTHESIS)
+SpeechSynthesis& TextTrack::speechSynthesis()
+{
+    if (!m_speechSynthesis) {
+        m_speechSynthesis = SpeechSynthesis::create(document());
+        m_speechSynthesis->removeBehaviorRestriction(SpeechSynthesis::RequireUserGestureForSpeechStartRestriction);
+    }
+
+    return *m_speechSynthesis;
+}
+#endif
 
 } // namespace WebCore
 

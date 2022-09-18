@@ -27,6 +27,8 @@
 
 #include "LayoutContainerBox.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 namespace WebCore {
 namespace Layout {
 
@@ -96,3 +98,4 @@ inline LayoutContainingBlockChainIteratorAdapter containingBlockChainWithinForma
 
 }
 }
+#endif

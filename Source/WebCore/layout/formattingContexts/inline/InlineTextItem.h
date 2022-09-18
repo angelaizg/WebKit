@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineItem.h"
 #include "LayoutInlineTextBox.h"
 
@@ -92,3 +94,4 @@ inline InlineTextItem InlineTextItem::createEmptyItem(const InlineTextBox& inlin
 
 SPECIALIZE_TYPE_TRAITS_INLINE_ITEM(InlineTextItem, isText())
 
+#endif

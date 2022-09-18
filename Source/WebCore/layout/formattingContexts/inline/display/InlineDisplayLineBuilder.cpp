@@ -26,6 +26,8 @@
 #include "config.h"
 #include "InlineDisplayLineBuilder.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineDisplayContentBuilder.h"
 #include "LayoutBoxGeometry.h"
 #include "TextUtil.h"
@@ -85,15 +87,14 @@ InlineDisplay::Line InlineDisplayLineBuilder::build(const LineBuilder::LineConte
     auto& rootGeometry = layoutState().geometryForBox(root());
     auto isLeftToRightDirection = lineContent.inlineBaseDirection == TextDirection::LTR;
     auto lineOffsetFromContentBox = lineContent.lineLogicalTopLeft.x() - rootGeometry.contentBoxLeft();
-    auto lineBoxLogicalWidth = lineBox.logicalRect().width();
 
     auto lineBoxVisualLeft = isLeftToRightDirection
         ? rootGeometry.contentBoxLeft() + lineOffsetFromContentBox
-        :  InlineLayoutUnit { rootGeometry.borderEnd() } + rootGeometry.horizontalSpaceForScrollbar() + rootGeometry.paddingEnd().value_or(0_lu) + rootGeometry.contentBoxWidth() - lineOffsetFromContentBox - lineBoxLogicalWidth;
-
+        : InlineLayoutUnit { rootGeometry.borderEnd() } + rootGeometry.horizontalSpaceForScrollbar() + rootGeometry.paddingEnd().value_or(0_lu);
     auto contentVisualLeft = isLeftToRightDirection
         ? lineBox.rootInlineBoxAlignmentOffset()
-        : lineBoxLogicalWidth - lineBox.rootInlineBoxAlignmentOffset() - lineContent.contentLogicalRight;
+        : rootGeometry.contentBoxWidth() - lineOffsetFromContentBox -  lineBox.rootInlineBoxAlignmentOffset() - lineContent.contentLogicalRight;
+
     auto lineBoxRect = InlineRect { lineContent.lineLogicalTopLeft.y(), lineBoxVisualLeft, lineBox.hasContent() ? lineContent.lineLogicalWidth : 0.f, lineBox.logicalRect().height() };
     auto enclosingLineGeometry = collectEnclosingLineGeometry(lineBox, lineBoxRect);
 
@@ -107,13 +108,13 @@ InlineDisplay::Line InlineDisplayLineBuilder::build(const LineBuilder::LineConte
         , contentVisualLeft
         , rootInlineBox.logicalWidth()
         , lineBox.isHorizontal()
-        , trailingEllipsisRect(lineContent, lineBox, lineBoxRect)
+        , trailingEllipsisRect(lineContent, lineBox)
     };
 }
 
 // FIXME: for bidi content, we may need to run this code after we finished constructing the display boxes
 // and also run truncation on the (visual)display box list and not on the (logical)line runs.
-std::optional<FloatRect> InlineDisplayLineBuilder::trailingEllipsisRect(const LineBuilder::LineContent& lineContent, const LineBox& lineBox, const FloatRect& lineBoxVisualRect) const
+std::optional<FloatRect> InlineDisplayLineBuilder::trailingEllipsisRect(const LineBuilder::LineContent& lineContent, const LineBox& lineBox) const
 {
     if (!lineContent.contentNeedsTrailingEllipsis)
         return { };
@@ -131,11 +132,12 @@ std::optional<FloatRect> InlineDisplayLineBuilder::trailingEllipsisRect(const Li
     }
     auto ellipsisWidth = !lineBox.lineIndex() ? root().firstLineStyle().fontCascade().width(TextUtil::ellipsisTextRun()) : root().style().fontCascade().width(TextUtil::ellipsisTextRun());
     auto rootInlineBoxRect = lineBox.logicalRectForRootInlineBox();
-    auto ellipsisRect = FloatRect { lineBoxVisualRect.x() + ellipsisStart, lineBoxVisualRect.y() + rootInlineBoxRect.top(), ellipsisWidth, rootInlineBoxRect.height() };
+    auto lineBoxRect = lineBox.logicalRect();
+    auto ellipsisRect = FloatRect { lineBoxRect.left() + ellipsisStart, lineBoxRect.top() + rootInlineBoxRect.top(), ellipsisWidth, rootInlineBoxRect.height() };
 
     if (root().style().isLeftToRightDirection())
         return ellipsisRect;
-    ellipsisRect.setX(lineBoxVisualRect.maxX() - (ellipsisStart + ellipsisRect.width()));
+    ellipsisRect.setX(lineBoxRect.right() - (ellipsisStart + ellipsisRect.width()));
     return ellipsisRect;
 }
 
@@ -158,3 +160,4 @@ InlineRect InlineDisplayLineBuilder::flipLogicalLineRectToVisualForWritingMode(c
 }
 }
 
+#endif

@@ -37,7 +37,7 @@ namespace WebCore {
 
 class PictureInPictureWindow final
     : public ActiveDOMObject
-    , public EventTarget
+    , public EventTargetWithInlineData
     , public RefCounted<PictureInPictureWindow> {
     WTF_MAKE_ISO_ALLOCATED(PictureInPictureWindow);
 public:

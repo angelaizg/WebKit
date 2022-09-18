@@ -706,7 +706,6 @@ Internals::Internals(Document& document)
 
 #if ENABLE(VP9) && PLATFORM(COCOA)
     VP9TestingOverrides::singleton().setHardwareDecoderDisabled(std::nullopt);
-    VP9TestingOverrides::singleton().setVP9DecoderDisabled(std::nullopt);
     VP9TestingOverrides::singleton().setVP9ScreenSizeAndScale(std::nullopt);
 #endif
 }
@@ -1047,24 +1046,6 @@ bool Internals::isImageAnimating(HTMLImageElement& element)
 {
     auto* image = imageFromImageElement(element);
     return image && (image->isAnimating() || image->animationPending());
-}
-
-void Internals::setImageAnimationEnabled(bool enabled)
-{
-    if (auto* page = contextDocument() ? contextDocument()->page() : nullptr) {
-        if (page->settings().imageAnimationControlEnabled())
-            page->setImageAnimationEnabled(enabled);
-    }
-}
-
-void Internals::resumeImageAnimation(HTMLImageElement& element)
-{
-    element.setAllowsAnimation(true);
-}
-
-void Internals::pauseImageAnimation(HTMLImageElement& element)
-{
-    element.setAllowsAnimation(false);
 }
 
 unsigned Internals::imagePendingDecodePromisesCountForTesting(HTMLImageElement& element)
@@ -1497,34 +1478,14 @@ ExceptionOr<void> Internals::setFormControlStateOfPreviousHistoryItem(const Vect
 
 void Internals::enableMockSpeechSynthesizer()
 {
-    auto document = contextDocument();
+    Document* document = contextDocument();
     if (!document || !document->domWindow())
         return;
-    auto synthesis = DOMWindowSpeechSynthesis::speechSynthesis(*document->domWindow());
+    SpeechSynthesis* synthesis = DOMWindowSpeechSynthesis::speechSynthesis(*document->domWindow());
     if (!synthesis)
         return;
 
-    auto mock = PlatformSpeechSynthesizerMock::create(*synthesis);
-    m_platformSpeechSynthesizer = static_cast<PlatformSpeechSynthesizerMock*>(mock.ptr());
-    synthesis->setPlatformSynthesizer(WTFMove(mock));
-}
-
-void Internals::enableMockSpeechSynthesizerForMediaElement(HTMLMediaElement& element)
-{
-    auto& synthesis = element.speechSynthesis();
-    auto mock = PlatformSpeechSynthesizerMock::create(synthesis);
-
-    m_platformSpeechSynthesizer = static_cast<PlatformSpeechSynthesizerMock*>(mock.ptr());
-    synthesis.setPlatformSynthesizer(WTFMove(mock));
-}
-
-ExceptionOr<void> Internals::setSpeechUtteranceDuration(double duration)
-{
-    if (!m_platformSpeechSynthesizer)
-        return Exception { InvalidAccessError };
-
-    m_platformSpeechSynthesizer->setUtteranceDuration(Seconds(duration));
-    return { };
+    synthesis->setPlatformSynthesizer(makeUnique<PlatformSpeechSynthesizerMock>(synthesis));
 }
 
 #endif
@@ -1872,7 +1833,7 @@ void Internals::invalidateFontCache()
 
 void Internals::setFontSmoothingEnabled(bool enabled)
 {
-    FontCascade::setShouldUseSmoothingForTesting(enabled);
+    FontCascade::setShouldUseSmoothing(enabled);
 }
 
 ExceptionOr<void> Internals::setLowPowerModeEnabled(bool isEnabled)
@@ -6452,15 +6413,6 @@ void Internals::setHardwareVP9DecoderDisabledForTesting(bool disabled)
 {
 #if ENABLE(VP9) && PLATFORM(COCOA)
     VP9TestingOverrides::singleton().setHardwareDecoderDisabled(disabled);
-#else
-    UNUSED_PARAM(disabled);
-#endif
-}
-
-void Internals::setVP9DecoderDisabledForTesting(bool disabled)
-{
-#if ENABLE(VP9) && PLATFORM(COCOA)
-    VP9TestingOverrides::singleton().setVP9DecoderDisabled(disabled);
 #else
     UNUSED_PARAM(disabled);
 #endif

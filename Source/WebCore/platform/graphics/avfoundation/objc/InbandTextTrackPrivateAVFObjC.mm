@@ -44,16 +44,14 @@
 
 namespace WebCore {
 
-InbandTextTrackPrivateAVFObjC::InbandTextTrackPrivateAVFObjC(AVFInbandTrackParent* player, AVMediaSelectionGroup *group, AVMediaSelectionOption *selection, InbandTextTrackPrivate::CueFormat format)
+InbandTextTrackPrivateAVFObjC::InbandTextTrackPrivateAVFObjC(AVFInbandTrackParent* player, AVMediaSelectionOption *selection, InbandTextTrackPrivate::CueFormat format)
     : InbandTextTrackPrivateAVF(player, format)
-    , m_mediaSelectionGroup(group)
     , m_mediaSelectionOption(selection)
 {
 }
 
 void InbandTextTrackPrivateAVFObjC::disconnect()
 {
-    m_mediaSelectionGroup = 0;
     m_mediaSelectionOption = 0;
     InbandTextTrackPrivateAVF::disconnect();
 }
@@ -162,7 +160,7 @@ AtomString InbandTextTrackPrivateAVFObjC::language() const
 
 bool InbandTextTrackPrivateAVFObjC::isDefault() const
 {
-    return [m_mediaSelectionGroup defaultOption] == m_mediaSelectionOption.get();
+    return false;
 }
 
 } // namespace WebCore

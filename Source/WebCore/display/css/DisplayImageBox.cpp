@@ -26,6 +26,8 @@
 #include "config.h"
 #include "DisplayImageBox.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "CachedImage.h"
 #include <wtf/IsoMallocInlines.h>
 
@@ -73,3 +75,4 @@ String ImageBox::debugDescription() const
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

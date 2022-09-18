@@ -56,7 +56,6 @@
 #include "SecurityPolicyViolationEvent.h"
 #include "Settings.h"
 #include "SubresourceIntegrity.h"
-#include "ViolationReportType.h"
 #include "WorkerGlobalScope.h"
 #include <JavaScriptCore/ScriptCallStack.h>
 #include <JavaScriptCore/ScriptCallStackFactory.h>
@@ -798,7 +797,9 @@ void ContentSecurityPolicy::reportViolation(const String& effectiveViolatedDirec
     info.columnNumber = sourcePosition.m_column.oneBasedInt();
     info.sample = violatedDirectiveList.shouldReportSample(effectiveViolatedDirective) ? sourceContent.left(40).toString() : emptyString();
 
-    if (!m_client) {
+    if (m_client)
+        m_client->willSendCSPViolationReport(info);
+    else {
         if (!usesReportTo && !is<Document>(m_scriptExecutionContext))
             return;
 
@@ -852,13 +853,19 @@ void ContentSecurityPolicy::reportViolation(const String& effectiveViolatedDirec
     violationEventInit.bubbles = true;
     violationEventInit.composed = true;
 
-    Vector<String> endpointURIs;
-    Vector<String> endpointTokens;
+    Vector<String> reportURIs;
     if (usesReportTo && m_reportingClient) {
         m_reportingClient->notifyReportObservers(Report::create(CSPViolationReportBody::cspReportType(), info.documentURI, CSPViolationReportBody::create(SecurityPolicyViolationEventInit { violationEventInit })));
-        endpointTokens = violatedDirectiveList.reportToTokens();
+
+        for (auto& token : violatedDirectiveList.reportToTokens()) {
+            auto reportToURI = m_reportingClient->endpointURIForToken(token);
+            if (reportToURI.isNull() || reportToURI.isEmpty())
+                continue;
+
+            reportURIs.append(WTFMove(reportToURI));
+        }
     } else
-        endpointURIs = violatedDirectiveList.reportURIs();
+        reportURIs = violatedDirectiveList.reportURIs();
 
     if (m_client)
         m_client->enqueueSecurityPolicyViolationEvent(WTFMove(violationEventInit));
@@ -871,18 +878,21 @@ void ContentSecurityPolicy::reportViolation(const String& effectiveViolatedDirec
     }
 
     // 2. Send violation report (if applicable).
-    if (endpointURIs.isEmpty() && endpointTokens.isEmpty())
-        return;
-
-    RELEASE_ASSERT(m_reportingClient || (!m_client && !m_scriptExecutionContext));
-    if (!m_reportingClient)
+    if (reportURIs.isEmpty())
         return;
 
     auto reportURL = m_documentURL ? m_documentURL.value().strippedForUseAsReferrer() : blockedURI;
 
     auto report = CSPViolationReportBody::createReportFormDataForViolation(info, usesReportTo, violatedDirectiveList.isReportOnly(), effectiveViolatedDirective, m_referrer, violatedDirectiveList.header(), blockedURI, httpStatusCode);
 
-    m_reportingClient->sendReportToEndpoints(m_protectedURL, endpointURIs, endpointTokens, WTFMove(report), ViolationReportType::ContentSecurityPolicy);
+    if (m_client) {
+        for (const auto& url : reportURIs)
+            m_client->sendCSPViolationReport(URL { m_protectedURL, url }, report.copyRef());
+    } else {
+        auto& document = downcast<Document>(*m_scriptExecutionContext);
+        for (const auto& url : reportURIs)
+            PingLoader::sendViolationReport(*document.frame(), URL { m_protectedURL, url }, report.copyRef(), ViolationReportType::ContentSecurityPolicy);
+    }
 }
 
 void ContentSecurityPolicy::reportUnsupportedDirective(const String& name) const

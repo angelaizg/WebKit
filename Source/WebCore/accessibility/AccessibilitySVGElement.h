@@ -47,6 +47,7 @@ private:
     AccessibilityRole determineAccessibilityRole() final;
     AccessibilityRole determineAriaRoleAttribute() const final;
     bool inheritsPresentationalRole() const final;
+    bool isAccessibilitySVGElement() const final { return true; }
     bool computeAccessibilityIsIgnored() const final;
 
     AccessibilityObject* targetForUseElement() const;
@@ -56,3 +57,5 @@ private:
 };
 
 } // namespace WebCore
+
+SPECIALIZE_TYPE_TRAITS_ACCESSIBILITY(AccessibilitySVGElement, isAccessibilitySVGElement())

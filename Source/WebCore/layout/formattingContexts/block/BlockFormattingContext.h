@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "BlockFormattingGeometry.h"
 #include "BlockFormattingQuirks.h"
 #include "BlockFormattingState.h"
@@ -100,3 +102,4 @@ private:
 
 SPECIALIZE_TYPE_TRAITS_LAYOUT_FORMATTING_CONTEXT(BlockFormattingContext, isBlockFormattingContext())
 
+#endif

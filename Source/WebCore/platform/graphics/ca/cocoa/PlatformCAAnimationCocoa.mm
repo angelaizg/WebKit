@@ -127,25 +127,26 @@ static PlatformCAAnimation::ValueFunctionType fromCAValueFunctionType(NSString* 
     return PlatformCAAnimation::NoValueFunction;
 }
 
-CAMediaTimingFunction* toCAMediaTimingFunction(const TimingFunction& timingFunction, bool reverse)
+CAMediaTimingFunction* toCAMediaTimingFunction(const TimingFunction* timingFunction, bool reverse)
 {
+    ASSERT(timingFunction);
     if (is<CubicBezierTimingFunction>(timingFunction)) {
         RefPtr<CubicBezierTimingFunction> reversed;
-        std::reference_wrapper<const CubicBezierTimingFunction> function = downcast<CubicBezierTimingFunction>(timingFunction);
+        auto* function = downcast<CubicBezierTimingFunction>(timingFunction);
 
         if (reverse) {
-            reversed = function.get().createReversed();
-            function = *reversed;
+            reversed = function->createReversed();
+            function = reversed.get();
         }
 
-        float x1 = static_cast<float>(function.get().x1());
-        float y1 = static_cast<float>(function.get().y1());
-        float x2 = static_cast<float>(function.get().x2());
-        float y2 = static_cast<float>(function.get().y2());
+        float x1 = static_cast<float>(function->x1());
+        float y1 = static_cast<float>(function->y1());
+        float x2 = static_cast<float>(function->x2());
+        float y2 = static_cast<float>(function->y2());
         return [CAMediaTimingFunction functionWithControlPoints: x1 : y1 : x2 : y2];
     }
     
-    ASSERT(timingFunction.type() == TimingFunction::TimingFunctionType::LinearFunction);
+    ASSERT(timingFunction->type() == TimingFunction::LinearFunction);
     return [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
 }
 
@@ -324,18 +325,17 @@ void PlatformCAAnimationCocoa::setFillMode(FillModeType value)
     [m_animation setFillMode:toCAFillModeType(value)];
 }
 
-void PlatformCAAnimationCocoa::setTimingFunction(const TimingFunction* timingFunction, bool reverse)
+void PlatformCAAnimationCocoa::setTimingFunction(const TimingFunction* value, bool reverse)
 {
-    ASSERT(timingFunction);
     switch (animationType()) {
     case Basic:
     case Keyframe:
-        [m_animation setTimingFunction:toCAMediaTimingFunction(*timingFunction, reverse)];
+        [m_animation setTimingFunction:toCAMediaTimingFunction(value, reverse)];
         break;
     case Spring:
-        if (timingFunction->isSpringTimingFunction()) {
+        if (value->isSpringTimingFunction()) {
             // FIXME: Handle reverse.
-            auto& function = *static_cast<const SpringTimingFunction*>(timingFunction);
+            auto& function = *static_cast<const SpringTimingFunction*>(value);
             CASpringAnimation *springAnimation = (CASpringAnimation *)m_animation.get();
             springAnimation.mass = function.mass();
             springAnimation.stiffness = function.stiffness();
@@ -561,10 +561,10 @@ void PlatformCAAnimationCocoa::copyKeyTimesFrom(const PlatformCAAnimation& value
     [static_cast<CAKeyframeAnimation *>(m_animation.get()) setKeyTimes:[other keyTimes]];
 }
 
-void PlatformCAAnimationCocoa::setTimingFunctions(const Vector<Ref<const TimingFunction>>& timingFunctions, bool reverse)
+void PlatformCAAnimationCocoa::setTimingFunctions(const Vector<const TimingFunction*>& value, bool reverse)
 {
-    [static_cast<CAKeyframeAnimation *>(m_animation.get()) setTimingFunctions:createNSArray(timingFunctions, [&] (auto& function) {
-        return toCAMediaTimingFunction(function.get(), reverse);
+    [static_cast<CAKeyframeAnimation *>(m_animation.get()) setTimingFunctions:createNSArray(value, [&] (auto& function) {
+        return toCAMediaTimingFunction(function, reverse);
     }).get()];
 }
 

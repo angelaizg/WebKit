@@ -24,7 +24,6 @@
 namespace WebCore {
 
 class Document;
-class WeakPtrImplWithEventTargetData;
 class Settings;
 
 class DOMParser : public RefCounted<DOMParser> {
@@ -37,7 +36,7 @@ public:
 private:
     explicit DOMParser(Document& contextDocument);
 
-    WeakPtr<Document, WeakPtrImplWithEventTargetData> m_contextDocument;
+    WeakPtr<Document> m_contextDocument;
     const Ref<const Settings> m_settings;
 };
 

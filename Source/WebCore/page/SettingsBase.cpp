@@ -484,10 +484,4 @@ void SettingsBase::resourceUsageOverlayVisibleChanged()
 #endif
 }
 
-void SettingsBase::setImageAnimationControlEnabledChanged()
-{
-    if (m_page && !m_page->settings().imageAnimationControlEnabled())
-        m_page->setImageAnimationEnabled(true);
-}
-
 } // namespace WebCore

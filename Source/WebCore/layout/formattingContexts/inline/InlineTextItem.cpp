@@ -26,6 +26,8 @@
 #include "config.h"
 #include "InlineTextItem.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FontCascade.h"
 #include "InlineSoftLineBreakItem.h"
 #include "TextUtil.h"
@@ -102,3 +104,4 @@ bool InlineTextItem::shouldPreserveSpacesAndTabs(const InlineTextItem& inlineTex
 
 }
 }
+#endif

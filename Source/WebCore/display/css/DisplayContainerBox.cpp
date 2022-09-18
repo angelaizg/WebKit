@@ -26,6 +26,8 @@
 #include "config.h"
 #include "DisplayContainerBox.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "DisplayBoxClip.h"
 #include "DisplayStyle.h"
 #include <wtf/IsoMallocInlines.h>
@@ -53,3 +55,4 @@ const char* ContainerBox::boxName() const
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

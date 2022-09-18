@@ -26,6 +26,8 @@
 #include "config.h"
 #include "BlockMarginCollapse.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "BlockFormattingContext.h"
 #include "BlockFormattingGeometry.h"
 #include "BlockFormattingQuirks.h"
@@ -97,3 +99,4 @@ PrecomputedMarginBefore BlockMarginCollapse::precomputedMarginBefore(const Box& 
 
 }
 }
+#endif

@@ -34,11 +34,14 @@ private:
     SVGSwitchElement(const QualifiedName&, Document&);
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGSwitchElement, SVGGraphicsElement>;
+    const SVGPropertyRegistry& propertyRegistry() const final { return m_propertyRegistry; }
 
     bool isValid() const final { return SVGTests::isValid(); }
 
     bool childShouldCreateRenderer(const Node&) const final;
     RenderPtr<RenderElement> createElementRenderer(RenderStyle&&, const RenderTreePosition&) final;
+
+    PropertyRegistry m_propertyRegistry { *this };
 };
 
 } // namespace WebCore

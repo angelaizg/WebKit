@@ -48,7 +48,9 @@ struct EndIterator { };
 class Box {
 public:
     using PathVariant = std::variant<
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
         BoxModernPath,
+#endif
         BoxLegacyPath
     >;
 
@@ -88,7 +90,9 @@ public:
 
     // FIXME: Remove. For intermediate porting steps only.
     const LegacyInlineBox* legacyInlineBox() const;
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
     const InlineDisplay::Box* inlineBox() const;
+#endif
 
     LeafBoxIterator nextOnLine() const;
     LeafBoxIterator previousOnLine() const;
@@ -99,7 +103,9 @@ public:
 
     LineBoxIterator lineBox() const;
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
     const BoxModernPath& modernPath() const;
+#endif
     const BoxLegacyPath& legacyPath() const;
 
 protected:
@@ -148,7 +154,9 @@ public:
 
 LeafBoxIterator boxFor(const RenderLineBreak&);
 LeafBoxIterator boxFor(const RenderBox&);
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
 LeafBoxIterator boxFor(const LayoutIntegration::InlineContent&, size_t boxIndex);
+#endif
 
 // -----------------------------------------------
 
@@ -248,12 +256,14 @@ inline const LegacyInlineBox* Box::legacyInlineBox() const
     return std::get<BoxLegacyPath>(m_pathVariant).legacyInlineBox();
 }
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
 inline const InlineDisplay::Box* Box::inlineBox() const
 {
     if (!std::holds_alternative<BoxModernPath>(m_pathVariant))
         return nullptr;
     return &std::get<BoxModernPath>(m_pathVariant).box();
 }
+#endif
 
 }
 }

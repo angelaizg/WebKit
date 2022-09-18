@@ -102,8 +102,10 @@ private:
 
 TextBoxIterator firstTextBoxFor(const RenderText&);
 TextBoxIterator textBoxFor(const LegacyInlineTextBox*);
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
 TextBoxIterator textBoxFor(const LayoutIntegration::InlineContent&, const InlineDisplay::Box&);
 TextBoxIterator textBoxFor(const LayoutIntegration::InlineContent&, size_t boxIndex);
+#endif
 TextBoxRange textBoxesFor(const RenderText&);
 
 inline bool TextBox::hasHyphen() const

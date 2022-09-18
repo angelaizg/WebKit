@@ -26,6 +26,8 @@
 #include "config.h"
 #include "DisplayCSSPainter.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "DisplayBoxClip.h"
 #include "DisplayBoxPainter.h"
 #include "DisplayBoxRareGeometry.h"
@@ -207,3 +209,4 @@ void CSSPainter::paintTree(const Tree& displayTree, PaintingContext& paintingCon
 } // namespace Display
 } // namespace WebCore
 
+#endif // ENABLE(LAYOUT_FORMATTING_CONTEXT)

@@ -59,8 +59,6 @@ public:
 
     CMClockRef timebaseClock();
 
-    void handleNewCurrentMicrophoneDevice(const CaptureDevice&);
-
 protected:
     CoreAudioCaptureSource(String&& deviceID, AtomString&& label, String&& hashSalt, uint32_t persistentID, BaseAudioSharedUnit*, PageIdentifier);
     virtual ~CoreAudioCaptureSource();
@@ -80,9 +78,6 @@ private:
     void stopProducingData() final;
 
     void delaySamples(Seconds) final;
-#if PLATFORM(IOS_FAMILY)
-    void setIsInBackground(bool) final;
-#endif
 
     std::optional<Vector<int>> discreteSampleRates() const final { return { { 8000, 16000, 32000, 44100, 48000, 96000 } }; }
 

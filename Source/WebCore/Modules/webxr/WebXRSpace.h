@@ -39,7 +39,7 @@ class Document;
 class ScriptExecutionContext;
 class WebXRRigidTransform;
 
-class WebXRSpace : public EventTarget, public ContextDestructionObserver {
+class WebXRSpace : public EventTargetWithInlineData, public ContextDestructionObserver {
     WTF_MAKE_ISO_ALLOCATED(WebXRSpace);
 public:
     virtual ~WebXRSpace();

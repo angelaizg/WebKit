@@ -46,7 +46,7 @@ struct JSLazyEventListener::CreationArguments {
     const QualifiedName& attributeName;
     const AtomString& attributeValue;
     Document& document;
-    WeakPtr<ContainerNode, WeakPtrImplWithEventTargetData> node;
+    WeakPtr<ContainerNode> node;
     JSObject* wrapper;
     bool shouldUseSVGEventName;
 };

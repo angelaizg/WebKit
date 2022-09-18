@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include "CustomElementDefaultARIA.h"
 #include "CustomElementReactionQueue.h"
 #include "DOMTokenList.h"
 #include "DatasetDOMStringMap.h"
@@ -66,9 +65,6 @@ public:
 
     CustomElementReactionQueue* customElementReactionQueue() { return m_customElementReactionQueue.get(); }
     void setCustomElementReactionQueue(std::unique_ptr<CustomElementReactionQueue>&& queue) { m_customElementReactionQueue = WTFMove(queue); }
-
-    CustomElementDefaultARIA* customElementDefaultARIA() { return m_customElementDefaultARIA.get(); }
-    void setCustomElementDefaultARIA(std::unique_ptr<CustomElementDefaultARIA>&& defaultARIA) { m_customElementDefaultARIA = WTFMove(defaultARIA); }
 
     NamedNodeMap* attributeMap() const { return m_attributeMap.get(); }
     void setAttributeMap(std::unique_ptr<NamedNodeMap> attributeMap) { m_attributeMap = WTFMove(attributeMap); }
@@ -135,9 +131,7 @@ public:
         if (m_shadowRoot)
             result.add(UseType::ShadowRoot);
         if (m_customElementReactionQueue)
-            result.add(UseType::CustomElementReactionQueue);
-        if (m_customElementDefaultARIA)
-            result.add(UseType::CustomElementDefaultARIA);
+            result.add(UseType::CustomElementQueue);
         if (m_attributeMap)
             result.add(UseType::AttributeMap);
         if (m_intersectionObserverData)
@@ -175,7 +169,6 @@ private:
     std::unique_ptr<DOMTokenList> m_classList;
     RefPtr<ShadowRoot> m_shadowRoot;
     std::unique_ptr<CustomElementReactionQueue> m_customElementReactionQueue;
-    std::unique_ptr<CustomElementDefaultARIA> m_customElementDefaultARIA;
     std::unique_ptr<NamedNodeMap> m_attributeMap;
 
     std::unique_ptr<IntersectionObserverData> m_intersectionObserverData;

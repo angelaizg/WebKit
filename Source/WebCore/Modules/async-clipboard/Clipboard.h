@@ -39,7 +39,7 @@ class Navigator;
 class Pasteboard;
 class PasteboardCustomData;
 
-class Clipboard final : public RefCounted<Clipboard>, public EventTarget {
+class Clipboard final : public RefCounted<Clipboard>, public EventTargetWithInlineData {
     WTF_MAKE_ISO_ALLOCATED(Clipboard);
 public:
     static Ref<Clipboard> create(Navigator&);
@@ -98,7 +98,7 @@ private:
         void didSetAllData();
         void reject();
 
-        WeakPtr<Clipboard, WeakPtrImplWithEventTargetData> m_clipboard;
+        WeakPtr<Clipboard> m_clipboard;
         Vector<std::optional<PasteboardCustomData>> m_dataToWrite;
         RefPtr<DeferredPromise> m_promise;
         unsigned m_pendingItemCount;

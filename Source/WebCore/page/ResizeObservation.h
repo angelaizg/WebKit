@@ -39,7 +39,6 @@ class TextStream;
 namespace WebCore {
 
 class Element;
-class WeakPtrImplWithEventTargetData;
 
 class ResizeObservation : public RefCounted<ResizeObservation> {
     WTF_MAKE_FAST_ALLOCATED;
@@ -72,7 +71,7 @@ private:
     BoxSizes computeObservedSizes() const;
     LayoutPoint computeTargetLocation() const;
 
-    WeakPtr<Element, WeakPtrImplWithEventTargetData> m_target;
+    WeakPtr<Element> m_target;
     BoxSizes m_lastObservationSizes;
     ResizeObserverBoxOptions m_observedBox;
 };

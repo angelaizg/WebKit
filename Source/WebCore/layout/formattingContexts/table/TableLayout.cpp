@@ -26,6 +26,8 @@
 #include "config.h"
 #include "TableFormattingContext.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutBox.h"
 #include "LayoutBoxGeometry.h"
 #include "TableFormattingGeometry.h"
@@ -457,3 +459,4 @@ TableFormattingContext::TableLayout::DistributedSpaces TableFormattingContext::T
 }
 }
 
+#endif

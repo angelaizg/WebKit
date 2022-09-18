@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineItem.h"
 
 namespace WebCore {
@@ -57,3 +59,4 @@ inline InlineSoftLineBreakItem::InlineSoftLineBreakItem(const InlineTextBox& inl
 
 SPECIALIZE_TYPE_TRAITS_INLINE_ITEM(InlineSoftLineBreakItem, isSoftLineBreak())
 
+#endif

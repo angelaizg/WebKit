@@ -30,7 +30,6 @@
 
 namespace WebCore {
 
-class WeakPtrImplWithEventTargetData;
 class WorkerGlobalScope;
 
 class WorkerStorageConnection final : public StorageConnection  {
@@ -47,7 +46,7 @@ private:
     void getPersisted(ClientOrigin&&, StorageConnection::PersistCallback&&) final;
     void fileSystemGetDirectory(ClientOrigin&&, StorageConnection::GetDirectoryCallback&&) final;
 
-    WeakPtr<WorkerGlobalScope, WeakPtrImplWithEventTargetData> m_scope;
+    WeakPtr<WorkerGlobalScope> m_scope;
     uint64_t m_lastCallbackIdentifier { 0 };
     HashMap<uint64_t, StorageConnection::PersistCallback> m_getPersistedCallbacks;
     HashMap<uint64_t, StorageConnection::GetDirectoryCallback> m_getDirectoryCallbacks;

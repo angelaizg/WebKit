@@ -37,7 +37,6 @@ class CachedFont;
 class FontLoadRequest;
 class SVGFontFaceElement;
 class ScriptExecutionContext;
-class WeakPtrImplWithEventTargetData;
 
 class CSSFontFaceSrcValue final : public CSSValue {
 public:
@@ -90,7 +89,7 @@ private:
     LoadedFromOpaqueSource m_loadedFromOpaqueSource { LoadedFromOpaqueSource::No };
 
     CachedResourceHandle<CachedFont> m_cachedFont;
-    WeakPtr<SVGFontFaceElement, WeakPtrImplWithEventTargetData> m_svgFontFaceElement;
+    WeakPtr<SVGFontFaceElement> m_svgFontFaceElement;
 };
 
 } // namespace WebCore

@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FloatingState.h"
 #include "FormattingContext.h"
 #include "LayoutContainerBox.h"
@@ -66,12 +68,9 @@ public:
         std::optional<PointInContextRoot> left;
         std::optional<PointInContextRoot> right;
     };
-    enum class MayBeAboveLastFloat : uint8_t { Yes, No };
-    Constraints constraints(LayoutUnit candidateTop, LayoutUnit candidateBottom, MayBeAboveLastFloat) const;
+    Constraints constraints(LayoutUnit candidateTop, LayoutUnit candidateBottom) const;
 
     FloatingState::FloatItem toFloatItem(const Box& floatBox) const;
-
-    bool isLeftToRightDirection() const { return floatingState().isLeftToRightDirection(); }
 
 private:
     std::optional<LayoutUnit> bottom(Clear) const;
@@ -93,3 +92,4 @@ private:
 
 }
 }
+#endif

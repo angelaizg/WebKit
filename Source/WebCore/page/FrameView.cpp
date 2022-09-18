@@ -110,7 +110,6 @@
 #include "ScrollbarTheme.h"
 #include "ScrollingCoordinator.h"
 #include "Settings.h"
-#include "ShadowRoot.h"
 #include "StyleResolver.h"
 #include "StyleScope.h"
 #include "TextIndicator.h"
@@ -141,8 +140,10 @@
 #include "LocalDefaultSystemAppearance.h"
 #endif
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
 #include "DisplayView.h"
 #include "LayoutContext.h"
+#endif
 
 #define PAGE_ID valueOrDefault(frame().pageID()).toUInt64()
 #define FRAME_ID valueOrDefault(frame().frameID()).toUInt64()
@@ -267,8 +268,6 @@ void FrameView::reset()
     m_shouldScrollToFocusedElement = false;
     m_delayedScrollToFocusedElementTimer.stop();
     m_delayedTextFragmentIndicatorTimer.stop();
-    m_pendingTextFragmentIndicatorRange.reset();
-    m_pendingTextFragmentIndicatorText = String();
     m_lastViewportSize = IntSize();
     m_lastZoomFactor = 1.0f;
     m_isTrackingRepaints = false;
@@ -574,7 +573,7 @@ void FrameView::setContentsSize(const IntSize& size)
 
     ScrollView::setContentsSize(size);
     contentsResized();
-
+    
     Page* page = frame().page();
     if (!page)
         return;
@@ -620,8 +619,8 @@ void FrameView::applyOverflowToViewport(const RenderElement& renderer, Scrollbar
 
     bool overrideHidden = frame().isMainFrame() && ((frame().frameScaleFactor() > 1) || headerHeight() || footerHeight());
 
-    Overflow overflowX = renderer.style().overflowX();
-    Overflow overflowY = renderer.style().overflowY();
+    Overflow overflowX = renderer.effectiveOverflowX();
+    Overflow overflowY = renderer.effectiveOverflowY();
 
 #if ENABLE(LAYER_BASED_SVG_ENGINE)
     if (is<RenderSVGRoot>(renderer)) {
@@ -966,11 +965,13 @@ void FrameView::updateScrollingCoordinatorScrollSnapProperties() const
 
 bool FrameView::flushCompositingStateForThisFrame(const Frame& rootFrameForFlush)
 {
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
     if (DeprecatedGlobalSettings::layoutFormattingContextEnabled()) {
         if (auto* view = existingDisplayView())
             view->flushLayers();
         return true;
     }
+#endif
 
     RenderView* renderView = this->renderView();
     if (!renderView)
@@ -1176,8 +1177,10 @@ void FrameView::setIsInWindow(bool isInWindow)
     if (RenderView* renderView = this->renderView())
         renderView->setIsInWindow(isInWindow);
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
     if (auto* view = existingDisplayView())
         view->setIsInWindow(isInWindow);
+#endif
 }
 
 void FrameView::forceLayoutParentViewIfNeeded()
@@ -2218,7 +2221,7 @@ bool FrameView::scrollToFragment(const URL& url)
     auto fragmentIdentifier = url.fragmentIdentifier();
     auto fragmentDirective = document->fragmentDirective();
     
-    if (frame().isMainFrame() && document->settings().scrollToTextFragmentEnabled() && !fragmentDirective.isEmpty()) {
+    if (document->settings().scrollToTextFragmentEnabled() && !fragmentDirective.isEmpty()) {
         FragmentDirectiveParser fragmentDirectiveParser(fragmentDirective);
         
         if (fragmentDirectiveParser.isValid()) {
@@ -2230,8 +2233,9 @@ bool FrameView::scrollToFragment(const URL& url)
             
             if (highlightRanges.size()) {
                 auto range = highlightRanges.first();
-                TemporarySelectionChange selectionChange(document, { range }, { TemporarySelectionOption::DelegateMainFrameScroll, TemporarySelectionOption::RevealSelectionBounds, TemporarySelectionOption::UserTriggered, TemporarySelectionOption::ForceCenterScroll });
-                maintainScrollPositionAtScrollToTextFragmentRange(range);
+                TemporarySelectionChange selectionChange(document, { range }, { TemporarySelectionOption::DelegateMainFrameScroll, TemporarySelectionOption::RevealSelectionBounds, TemporarySelectionOption::UserTriggered });
+                m_pendingTextFragmentIndicatorRange = range;
+                m_pendingTextFragmentIndicatorText = plainText(range);
                 if (frame().settings().scrollToTextFragmentIndicatorEnabled())
                     m_delayedTextFragmentIndicatorTimer.startOneShot(100_ms);
                 return true;
@@ -2320,16 +2324,6 @@ void FrameView::maintainScrollPositionAtAnchor(ContainerNode* anchorNode)
         layoutContext().layout();
     else
         scrollToAnchor();
-}
-
-void FrameView::maintainScrollPositionAtScrollToTextFragmentRange(SimpleRange& range)
-{
-    m_pendingTextFragmentIndicatorRange = range;
-    m_pendingTextFragmentIndicatorText = plainText(range);
-    if (!m_pendingTextFragmentIndicatorRange)
-        return;
-
-    scrollToTextFragmentRange();
 }
 
 void FrameView::scrollElementToRect(const Element& element, const IntRect& rect)
@@ -2447,10 +2441,6 @@ void FrameView::scrollToFocusedElementInternal()
     auto updateTarget = focusedElement->focusAppearanceUpdateTarget();
     if (!updateTarget)
         return;
-    
-    // Get the scroll-margin of the shadow host when we're inside a user agent shadow root.
-    if (updateTarget->containingShadowRoot() && updateTarget->containingShadowRoot()->mode() == ShadowRootMode::UserAgent)
-        updateTarget = updateTarget->shadowHost();
 
     auto* renderer = updateTarget->renderer();
     if (!renderer || renderer->isWidget())
@@ -2468,59 +2458,21 @@ void FrameView::textFragmentIndicatorTimerFired()
     ASSERT(frame().document());
     auto& document = *frame().document();
     
-    m_delayedTextFragmentIndicatorTimer.stop();
-    
     if (!m_pendingTextFragmentIndicatorRange)
         return;
     
     if (m_pendingTextFragmentIndicatorText != plainText(m_pendingTextFragmentIndicatorRange.value()))
         return;
     
-    auto range = m_pendingTextFragmentIndicatorRange.value();
-    
-    TemporarySelectionChange selectionChange(document, { range }, { TemporarySelectionOption::DelegateMainFrameScroll, TemporarySelectionOption::RevealSelectionBounds, TemporarySelectionOption::UserTriggered, TemporarySelectionOption::ForceCenterScroll });
-    
-    maintainScrollPositionAtScrollToTextFragmentRange(range);
-    
-    auto textIndicator = TextIndicator::createWithRange(range, { TextIndicatorOption::DoNotClipToVisibleRect }, WebCore::TextIndicatorPresentationTransition::Bounce);
-    
-    auto* page = frame().page();
-    
-    if (!page)
-        return;
-    
-    if (textIndicator) {
-        constexpr OptionSet<HitTestRequest::Type> hitType { HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active, HitTestRequest::Type::AllowVisibleChildFrameContentOnly };
-        
-        auto textRects = RenderFlexibleBox::absoluteTextRects(range);
-        
-        HitTestResult result;
-        result = page->mainFrame().eventHandler().hitTestResultAtPoint(LayoutPoint(textRects.first().center()), hitType);
-        if (!intersects(range, *result.targetNode()))
-            return;
-        
-        if (textRects.size() >= 2) {
-            result = page->mainFrame().eventHandler().hitTestResultAtPoint(LayoutPoint(textRects[1].center()), hitType);
-            if (!intersects(range, *result.targetNode()))
-                return;
-        }
-        
-        if (textRects.size() >= 4) {
-            result = page->mainFrame().eventHandler().hitTestResultAtPoint(LayoutPoint(textRects.last().center()), hitType);
-            if (!intersects(range, *result.targetNode()))
-                return;
-            result = page->mainFrame().eventHandler().hitTestResultAtPoint(LayoutPoint(textRects[textRects.size() - 2].center()), hitType);
-            if (!intersects(range, *result.targetNode()))
-                return;
-        }
+    auto textIndicator = TextIndicator::createWithRange(m_pendingTextFragmentIndicatorRange.value(), { TextIndicatorOption::DoNotClipToVisibleRect }, WebCore::TextIndicatorPresentationTransition::Bounce);
+    if (textIndicator)
         document.page()->chrome().client().setTextIndicator(textIndicator->data());
-    }
+    
+    cancelScheduledTextFragmentIndicatorTimer();
 }
 
 void FrameView::cancelScheduledTextFragmentIndicatorTimer()
 {
-    if (m_skipScrollResetOfScrollToTextFragmentRange)
-        return;
     m_pendingTextFragmentIndicatorRange.reset();
     m_pendingTextFragmentIndicatorText = String();
     m_delayedTextFragmentIndicatorTimer.stop();
@@ -2804,15 +2756,6 @@ void FrameView::resumeVisibleImageAnimations(const IntRect& visibleRect)
         renderView->resumePausedImageAnimationsIfNeeded(visibleRect);
 }
 
-void FrameView::repaintVisibleImageAnimations(const IntRect& visibleRect)
-{
-    if (visibleRect.isEmpty())
-        return;
-
-    if (auto* renderView = frame().contentRenderer())
-        renderView->repaintImageAnimationsIfNeeded(visibleRect);
-}
-
 void FrameView::updateScriptedAnimationsAndTimersThrottlingState(const IntRect& visibleRect)
 {
     if (frame().isMainFrame())
@@ -2845,13 +2788,6 @@ void FrameView::resumeVisibleImageAnimationsIncludingSubframes()
 {
     applyRecursivelyWithVisibleRect([] (FrameView& frameView, const IntRect& visibleRect) {
         frameView.resumeVisibleImageAnimations(visibleRect);
-    });
-}
-
-void FrameView::repaintVisibleImageAnimationsIncludingSubframes()
-{
-    applyRecursivelyWithVisibleRect([] (FrameView& frameView, const IntRect& visibleRect) {
-        frameView.repaintVisibleImageAnimations(visibleRect);
     });
 }
 
@@ -3096,8 +3032,6 @@ void FrameView::addedOrRemovedScrollbar()
     }
 
     updateTiledBackingAdaptiveSizing();
-
-    InspectorInstrumentation::didAddOrRemoveScrollbars(*this);
 }
 
 TiledBacking::Scrollability FrameView::computeScrollability() const
@@ -3543,30 +3477,6 @@ void FrameView::scrollToAnchor()
     cancelScheduledScrolls();
 }
 
-void FrameView::scrollToTextFragmentRange()
-{
-    if (!m_pendingTextFragmentIndicatorRange)
-        return;
-
-    auto rangeText = plainText(m_pendingTextFragmentIndicatorRange.value());
-    if (m_pendingTextFragmentIndicatorText != plainText(m_pendingTextFragmentIndicatorRange.value()))
-        return;
-
-    auto range = m_pendingTextFragmentIndicatorRange.value();
-
-    LOG_WITH_STREAM(Scrolling, stream << *this << " scrollToTextFragmentRange() " << range);
-
-    if (!range.startContainer().renderer() || !range.endContainer().renderer())
-        return;
-
-    ASSERT(frame().document());
-    Ref document = *frame().document();
-
-    SetForScope skipScrollResetOfScrollToTextFragmentRange(m_skipScrollResetOfScrollToTextFragmentRange, true);
-    
-    TemporarySelectionChange selectionChange(document, { range }, { TemporarySelectionOption::DelegateMainFrameScroll, TemporarySelectionOption::RevealSelectionBounds, TemporarySelectionOption::UserTriggered, TemporarySelectionOption::ForceCenterScroll });
-}
-
 void FrameView::updateEmbeddedObject(RenderEmbeddedObject& embeddedObject)
 {
     // No need to update if it's already crashed or known to be missing.
@@ -3690,8 +3600,6 @@ void FrameView::performPostLayoutTasks()
     }
 
     scrollToAnchor();
-    
-    scrollToTextFragmentRange();
 
     scheduleResizeEventIfNeeded();
     
@@ -5737,6 +5645,7 @@ RenderView* FrameView::renderView() const
     return frame().contentRenderer();
 }
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
 Display::View* FrameView::existingDisplayView() const
 {
     return m_displayView.get();
@@ -5748,6 +5657,7 @@ Display::View& FrameView::displayView()
         m_displayView = makeUnique<Display::View>(*this);
     return *m_displayView;
 }
+#endif
 
 int FrameView::mapFromLayoutToCSSUnits(LayoutUnit value) const
 {

@@ -43,8 +43,6 @@ public:
     static Ref<ScrollingTreeOverflowScrollProxyNode> create(ScrollingTree&, ScrollingNodeID);
     virtual ~ScrollingTreeOverflowScrollProxyNode();
 
-    FloatSize scrollDeltaSinceLastCommit() const;
-
     ScrollingNodeID overflowScrollingNodeID() const { return m_overflowScrollingNodeID; }
 
 private:

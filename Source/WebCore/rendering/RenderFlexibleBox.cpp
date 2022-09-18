@@ -1131,8 +1131,10 @@ LayoutUnit RenderFlexibleBox::computeFlexBaseSizeForChild(RenderBox& child, Layo
 
 void RenderFlexibleBox::layoutFlexItems(bool relayoutChildren)
 {
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
     if (LayoutIntegration::canUseForFlexLayout(*this))
         return layoutUsingFlexFormattingContext();
+#endif
     Vector<LineContext> lineContexts;
     LayoutUnit sumFlexBaseSize;
     double totalFlexGrow;
@@ -2394,6 +2396,7 @@ LayoutUnit RenderFlexibleBox::computeGap(RenderFlexibleBox::GapType gapType) con
     return minimumValueForLength(gapLength.length(), availableSize);
 }
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
 void RenderFlexibleBox::layoutUsingFlexFormattingContext()
 {
     auto flexLayout = LayoutIntegration::FlexLayout { *this };
@@ -2414,5 +2417,6 @@ void RenderFlexibleBox::layoutUsingFlexFormattingContext()
     setLogicalHeight(std::max(logicalHeight(), borderBefore() + paddingBefore() + flexLayout.contentLogicalHeight() + borderAfter() + paddingAfter()));
     updateLogicalHeight();
 }
+#endif
 
 }

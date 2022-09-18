@@ -25,10 +25,11 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutBoxGeometry.h"
 #include "LayoutContainerBox.h"
 #include <wtf/IsoMalloc.h>
-#include <wtf/OptionSet.h>
 #include <wtf/Ref.h>
 
 namespace WebCore {
@@ -58,7 +59,6 @@ public:
         FloatItem(Position, BoxGeometry absoluteBoxGeometry);
 
         bool isLeftPositioned() const { return m_position == Position::Left; }
-        bool isRightPositioned() const { return m_position == Position::Right; }
         bool isInFormattingContextOf(const ContainerBox& formattingContextRoot) const { return m_layoutBox->isInFormattingContextOf(formattingContextRoot); }
 
         Rect rectWithMargin() const { return BoxGeometry::marginBoxRect(m_absoluteBoxGeometry); }
@@ -78,16 +78,7 @@ public:
     const FloatItem* last() const { return floats().isEmpty() ? nullptr : &m_floats.last(); }
 
     void append(FloatItem);
-    void clear();
-
-    bool isEmpty() const { return floats().isEmpty(); }
-    bool hasLeftPositioned() const;
-    bool hasRightPositioned() const;
-
-    bool isLeftToRightDirection() const { return m_isLeftToRightDirection; }
-    // FIXME: This should always be floatingState's root().style().isLeftToRightDirection() if we used the actual containing block of the intrusive
-    // floats to initiate the floating state in the integration codepath (i.e. when the float comes from the parent BFC).
-    void setIsLeftToRightDirection(bool isLeftToRightDirection) { m_isLeftToRightDirection = isLeftToRightDirection; }
+    void clear() { m_floats.clear(); }
 
 private:
     friend class FloatingContext;
@@ -97,23 +88,8 @@ private:
     LayoutState& m_layoutState;
     CheckedRef<const ContainerBox> m_formattingContextRoot;
     FloatList m_floats;
-    enum class PositionType {
-        Left = 1 << 0,
-        Right  = 1 << 1
-    };
-    OptionSet<PositionType> m_positionTypes;
-    bool m_isLeftToRightDirection { true };
 };
 
-inline bool FloatingState::hasLeftPositioned() const
-{
-    return m_positionTypes.contains(PositionType::Left);
-}
-
-inline bool FloatingState::hasRightPositioned() const
-{
-    return m_positionTypes.contains(PositionType::Right);
-}
-
 }
 }
+#endif

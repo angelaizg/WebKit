@@ -40,6 +40,7 @@ private:
     virtual ~SVGTRefElement();
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGTRefElement, SVGTextPositioningElement, SVGURIReference>;
+    const SVGPropertyRegistry& propertyRegistry() const final { return m_propertyRegistry; }
 
     void parseAttribute(const QualifiedName&, const AtomString&) override;
     void svgAttributeChanged(const QualifiedName&) override;
@@ -57,6 +58,7 @@ private:
     void detachTarget();
     void buildPendingResource() override;
 
+    PropertyRegistry m_propertyRegistry { *this };
     Ref<SVGTRefTargetEventListener> m_targetListener;
 };
 

@@ -40,7 +40,7 @@ namespace WebCore {
 WTF_MAKE_ISO_ALLOCATED_IMPL(SVGImageElement);
 
 inline SVGImageElement::SVGImageElement(const QualifiedName& tagName, Document& document)
-    : SVGGraphicsElement(tagName, document, makeUniqueRef<PropertyRegistry>(*this))
+    : SVGGraphicsElement(tagName, document)
     , SVGURIReference(this)
     , m_imageLoader(*this)
 {
@@ -110,7 +110,7 @@ void SVGImageElement::svgAttributeChanged(const QualifiedName& attrName)
             updateRelativeLengthsInformation();
 
 #if ENABLE(LAYER_BASED_SVG_ENGINE)
-            if (is<RenderSVGImage>(renderer()))
+            if (auto* image = dynamicDowncast<RenderSVGImage>(renderer()))
                 updateSVGRendererForElementChange();
 #endif
             if (auto* image = dynamicDowncast<LegacyRenderSVGImage>(renderer())) {

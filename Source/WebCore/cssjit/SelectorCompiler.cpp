@@ -101,7 +101,6 @@ static JSC_DECLARE_JIT_OPERATION_WITHOUT_WTF_INTERNAL(operationMatchesReadWriteP
 static JSC_DECLARE_JIT_OPERATION_WITHOUT_WTF_INTERNAL(operationIsRequiredFormControl, bool, (const Element&));
 static JSC_DECLARE_JIT_OPERATION_WITHOUT_WTF_INTERNAL(operationIsValid, bool, (const Element&));
 static JSC_DECLARE_JIT_OPERATION_WITHOUT_WTF_INTERNAL(operationIsWindowInactive, bool, (const Element&));
-static JSC_DECLARE_JIT_OPERATION_WITHOUT_WTF_INTERNAL(operationMatchesDir, bool, (const Element&, uint32_t));
 static JSC_DECLARE_JIT_OPERATION_WITHOUT_WTF_INTERNAL(operationMatchesLangPseudoClass, bool, (const Element&, const Vector<AtomString>&));
 #if ENABLE(FULLSCREEN_API)
 static JSC_DECLARE_JIT_OPERATION_WITHOUT_WTF_INTERNAL(operationMatchesFullScreenPseudoClass, bool, (const Element&));
@@ -274,7 +273,6 @@ struct SelectorFragment {
     // the min/max/average of the vectors and pick better inline capacity.
     const CSSSelector* tagNameSelector = nullptr;
     const AtomString* id = nullptr;
-    Vector<TextDirection> dirList;
     Vector<const Vector<AtomString>*> languageArgumentsList;
     Vector<const AtomStringImpl*, 8> classNames;
     HashSet<unsigned> pseudoClasses;
@@ -376,7 +374,6 @@ private:
     void generateElementIsEmpty(Assembler::JumpList& failureCases);
     void generateElementIsFirstChild(Assembler::JumpList& failureCases);
     void generateElementIsHovered(Assembler::JumpList& failureCases, const SelectorFragment&);
-    void generateElementMatchesDir(Assembler::JumpList& failureCases, const SelectorFragment&);
     void generateElementIsInLanguage(Assembler::JumpList& failureCases, const SelectorFragment&);
     void generateElementIsInLanguage(Assembler::JumpList& failureCases, const Vector<AtomString>*);
     void generateElementIsLastChild(Assembler::JumpList& failureCases);
@@ -803,13 +800,6 @@ JSC_DEFINE_JIT_OPERATION(operationHasAttachment, bool, (const Element& element))
 }
 #endif
 
-JSC_DEFINE_JIT_OPERATION(operationMatchesDir, bool, (const Element& element, uint32_t direction))
-{
-    if (!element.document().settings().dirPseudoEnabled())
-        return false;
-    return element.effectiveTextDirection() == static_cast<TextDirection>(direction);
-}
-
 JSC_DEFINE_JIT_OPERATION(operationMatchesLangPseudoClass, bool, (const Element& element, const Vector<AtomString>& argumentList))
 {
     return matchesLangPseudoClass(element, argumentList);
@@ -982,6 +972,7 @@ static inline FunctionType addPseudoClassType(const CSSSelector& selector, Selec
     case CSSSelector::PseudoClassDrag:
     case CSSSelector::PseudoClassHas:
     case CSSSelector::PseudoClassRelativeScope:
+    case CSSSelector::PseudoClassDir:
         return FunctionType::CannotCompile;
 
     // Optimized pseudo selectors.
@@ -1072,17 +1063,6 @@ static inline FunctionType addPseudoClassType(const CSSSelector& selector, Selec
                 fragment.notFilters.removeLast();
 
             return functionType;
-        }
-    case CSSSelector::PseudoClassDir:
-        {
-            auto& dirArgument = selector.argument();
-            if (equalIgnoringASCIICase(dirArgument, "ltr"_s))
-                fragment.dirList.append(TextDirection::LTR);
-            else if (equalIgnoringASCIICase(dirArgument, "rtl"_s))
-                fragment.dirList.append(TextDirection::RTL);
-            else
-                return FunctionType::CannotMatchAnything;
-            return FunctionType::SimpleSelectorChecker;
         }
     case CSSSelector::PseudoClassLang:
         {
@@ -2945,8 +2925,6 @@ void SelectorCodeGenerator::generateElementMatching(Assembler::JumpList& matchin
         generateElementMatchesAnyPseudoClass(matchingPostTagNameFailureCases, fragment);
     if (!fragment.matchesFilters.isEmpty())
         generateElementMatchesMatchesPseudoClass(matchingPostTagNameFailureCases, fragment);
-    if (!fragment.dirList.isEmpty())
-        generateElementMatchesDir(matchingPostTagNameFailureCases, fragment);
     if (!fragment.languageArgumentsList.isEmpty())
         generateElementIsInLanguage(matchingPostTagNameFailureCases, fragment);
     if (!fragment.nthChildOfFilters.isEmpty())
@@ -3589,19 +3567,6 @@ void SelectorCodeGenerator::generateElementIsHovered(Assembler::JumpList& failur
     functionCall.setFunctionAddress(operationElementIsHovered);
     functionCall.setOneArgument(elementAddressRegister);
     failureCases.append(functionCall.callAndBranchOnBooleanReturnValue(Assembler::Zero));
-}
-
-void SelectorCodeGenerator::generateElementMatchesDir(Assembler::JumpList& failureCases, const SelectorFragment& fragment)
-{
-    for (TextDirection dir : fragment.dirList) {
-        LocalRegister directionRegister(m_registerAllocator);
-        m_assembler.move(Assembler::TrustedImm32(static_cast<uint32_t>(dir)), directionRegister);
-
-        FunctionCall functionCall(m_assembler, m_registerAllocator, m_stackAllocator, m_functionCalls);
-        functionCall.setFunctionAddress(operationMatchesDir);
-        functionCall.setTwoArguments(elementAddressRegister, directionRegister);
-        failureCases.append(functionCall.callAndBranchOnBooleanReturnValue(Assembler::Zero));
-    }
 }
 
 void SelectorCodeGenerator::generateElementIsInLanguage(Assembler::JumpList& failureCases, const SelectorFragment& fragment)

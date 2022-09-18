@@ -52,7 +52,6 @@ struct SVGAttributeHashTranslator {
 
 template<typename OwnerType, typename... BaseTypes>
 class SVGPropertyOwnerRegistry : public SVGPropertyRegistry {
-    WTF_MAKE_FAST_ALLOCATED;
 public:
     SVGPropertyOwnerRegistry(OwnerType& owner)
         : m_owner(owner)

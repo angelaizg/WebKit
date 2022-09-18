@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "Font.h"
 #include "InlineItem.h"
 #include "InlineLine.h"
@@ -79,3 +81,4 @@ public:
 
 }
 }
+#endif

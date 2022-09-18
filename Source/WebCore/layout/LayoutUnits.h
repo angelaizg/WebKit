@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutUnit.h"
 #include "LayoutPoint.h"
 #include "LayoutRect.h"
@@ -235,3 +237,4 @@ template<> struct HashTraits<WebCore::Layout::SlotPosition> : GenericHashTraits<
 template<> struct DefaultHash<WebCore::Layout::SlotPosition> : SlotPositionHash { };
 }
 
+#endif

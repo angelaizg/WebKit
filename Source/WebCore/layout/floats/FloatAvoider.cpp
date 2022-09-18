@@ -26,6 +26,8 @@
 #include "config.h"
 #include "FloatAvoider.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "LayoutBox.h"
 #include "LayoutContainerBox.h"
 #include <wtf/IsoMallocInlines.h>
@@ -95,3 +97,4 @@ bool FloatAvoider::overflowsContainingBlock() const
 
 }
 }
+#endif

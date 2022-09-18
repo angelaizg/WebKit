@@ -26,8 +26,11 @@
 #include "config.h"
 #include "LayoutUnits.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 namespace WebCore {
 namespace Layout {
 
 }
 }
+#endif

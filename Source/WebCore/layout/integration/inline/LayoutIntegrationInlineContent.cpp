@@ -26,6 +26,8 @@
 #include "config.h"
 #include "LayoutIntegrationInlineContent.h"
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "InlineIteratorBox.h"
 #include "LayoutIntegrationLineLayout.h"
 #include "TextPainter.h"
@@ -183,3 +185,4 @@ void InlineContent::shrinkToFit()
 }
 }
 
+#endif

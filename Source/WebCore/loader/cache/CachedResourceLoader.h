@@ -203,7 +203,7 @@ private:
     MemoryCompactRobinHoodHashSet<URL> m_validatedURLs;
     MemoryCompactRobinHoodHashSet<URL> m_cachedSVGImagesURLs;
     mutable DocumentResourceMap m_documentResources;
-    WeakPtr<Document, WeakPtrImplWithEventTargetData> m_document;
+    WeakPtr<Document> m_document;
     DocumentLoader* m_documentLoader;
 
     int m_requestCount { 0 };

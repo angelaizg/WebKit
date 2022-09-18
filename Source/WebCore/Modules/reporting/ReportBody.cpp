@@ -26,20 +26,17 @@
 #include "config.h"
 #include "ReportBody.h"
 
-#include "FormData.h"
-#include <wtf/IsoMallocInlines.h>
-
 namespace WebCore {
 
 WTF_MAKE_ISO_ALLOCATED_IMPL(ReportBody);
 
-ReportBody::ReportBody(ViolationReportType type)
+ReportBody::ReportBody(ReportBodyType type)
     : m_reportBodyType(type)
 { }
 
 ReportBody::~ReportBody() = default;
 
-ViolationReportType ReportBody::reportBodyType() const
+ReportBodyType ReportBody::reportBodyType() const
 {
     return m_reportBodyType;
 }

@@ -39,7 +39,7 @@ namespace WebCore {
 struct FetchOptions;
 struct WorkerOptions;
 
-class AbstractWorker : public RefCounted<AbstractWorker>, public EventTarget {
+class AbstractWorker : public RefCounted<AbstractWorker>, public EventTargetWithInlineData {
     WTF_MAKE_ISO_ALLOCATED(AbstractWorker);
 public:
     using RefCounted::ref;

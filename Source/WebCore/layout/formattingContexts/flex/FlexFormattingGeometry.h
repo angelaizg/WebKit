@@ -25,6 +25,8 @@
 
 #pragma once
 
+#if ENABLE(LAYOUT_FORMATTING_CONTEXT)
+
 #include "FormattingGeometry.h"
 
 namespace WebCore {
@@ -53,3 +55,4 @@ private:
 
 SPECIALIZE_TYPE_TRAITS_LAYOUT_FORMATTING_GEOMETRY(FlexFormattingGeometry, isFlexFormattingGeometry())
 
+#endif

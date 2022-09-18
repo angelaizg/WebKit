@@ -55,7 +55,7 @@ public:
 
     std::unique_ptr<Update> resolve();
 
-    bool hasUnresolvedQueryContainers() const { return m_hasUnresolvedQueryContainers; }
+    bool hasUnresolvedQueryContainers() const { return !m_unresolvedQueryContainers.isEmpty(); }
 
 private:
     enum class ResolutionType : uint8_t { FastPathInherit, Full };
@@ -63,11 +63,10 @@ private:
 
     void resolveComposedTree();
 
-    enum class QueryContainerAction : uint8_t { None, Resolve, Continue };
+    enum class QueryContainerAction : uint8_t { None, Resolve };
+    QueryContainerAction determineQueryContainerAction(const Element&, const RenderStyle*, ContainerType previousContainerType);
+
     enum class DescendantsToResolve : uint8_t { None, ChildrenWithExplicitInherit, Children, All };
-
-    QueryContainerAction updateStateForQueryContainer(Element&, const RenderStyle*, ContainerType previousContainerType, Change&, DescendantsToResolve&);
-
     std::pair<ElementUpdate, DescendantsToResolve> resolveElement(Element&, ResolutionType);
 
     ElementUpdate createAnimatedElementUpdate(std::unique_ptr<RenderStyle>, const Styleable&, Change, const ResolutionContext&);
@@ -124,11 +123,6 @@ private:
     const RenderStyle* parentBoxStyle() const;
     const RenderStyle* parentBoxStyleForPseudoElement(const ElementUpdate&) const;
 
-    struct QueryContainerState {
-        Change change { Change::None };
-        DescendantsToResolve descendantsToResolve { DescendantsToResolve::None };
-    };
-
     Document& m_document;
     std::unique_ptr<RenderStyle> m_documentElementStyle;
 
@@ -136,8 +130,8 @@ private:
     Vector<Parent, 32> m_parentStack;
     bool m_didSeePendingStylesheet { false };
 
-    HashMap<Ref<Element>, std::optional<QueryContainerState>> m_queryContainerStates;
-    bool m_hasUnresolvedQueryContainers { false };
+    Vector<Ref<const Element>> m_unresolvedQueryContainers;
+    HashSet<Ref<const Element>> m_resolvedQueryContainers;
 
     std::unique_ptr<Update> m_update;
 };

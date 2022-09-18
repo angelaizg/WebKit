@@ -171,7 +171,7 @@ void ExtensionsGLOpenGL::drawBuffersEXT(GCGLSpan<const GCGLenum> bufs)
 
     //  FIXME: implement support for other platforms.
 #if PLATFORM(GTK)
-    ::glDrawBuffers(bufs.size(), bufs.data());
+    ::glDrawBuffers(bufs.bufSize, bufs.data);
 #else
     UNUSED_PARAM(n);
     UNUSED_PARAM(bufs);

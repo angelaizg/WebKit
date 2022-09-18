@@ -47,6 +47,7 @@ struct GreaterThanOrSameSizeAsStyleRareInheritedData : public RefCounted<Greater
     Length lengths[2];
     float secondFloat;
     TextUnderlineOffset offset;
+    TextDecorationThickness thickness;
     void* customPropertyDataRefs[1];
     unsigned bitfields[7];
     short pagedMediaShorts[2];
@@ -78,12 +79,10 @@ StyleRareInheritedData::StyleRareInheritedData()
     : textStrokeWidth(RenderStyle::initialTextStrokeWidth())
     , listStyleImage(RenderStyle::initialListStyleImage())
     , listStyleStringValue(RenderStyle::initialListStyleStringValue())
-    , textStrokeColor(RenderStyle::initialTextStrokeColor())
-    , textFillColor(RenderStyle::initialTextFillColor())
-    , textEmphasisColor(RenderStyle::initialTextEmphasisColor())
     , indent(RenderStyle::initialTextIndent())
     , effectiveZoom(RenderStyle::initialZoom())
     , textUnderlineOffset(RenderStyle::initialTextUnderlineOffset())
+    , textDecorationThickness(RenderStyle::initialTextDecorationThickness())
     , miterLimit(RenderStyle::initialStrokeMiterLimit())
     , customProperties(StyleCustomPropertyData::create())
     , widows(RenderStyle::initialWidows())
@@ -179,6 +178,7 @@ inline StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedDa
     , indent(o.indent)
     , effectiveZoom(o.effectiveZoom)
     , textUnderlineOffset(o.textUnderlineOffset)
+    , textDecorationThickness(o.textDecorationThickness)
     , miterLimit(o.miterLimit)
     , customProperties(o.customProperties)
     , widows(o.widows)
@@ -289,6 +289,7 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && indent == o.indent
         && effectiveZoom == o.effectiveZoom
         && textUnderlineOffset == o.textUnderlineOffset
+        && textDecorationThickness == o.textDecorationThickness
         && wordSpacing == o.wordSpacing
         && miterLimit == o.miterLimit
         && widows == o.widows
