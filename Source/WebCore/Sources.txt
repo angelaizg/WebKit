@@ -257,7 +257,6 @@ Modules/paymentrequest/PaymentRequest.cpp
 Modules/paymentrequest/PaymentRequestUpdateEvent.cpp
 Modules/paymentrequest/PaymentRequestUtilities.cpp
 Modules/paymentrequest/PaymentResponse.cpp
-Modules/permissions/MainThreadPermissionObserver.cpp
 Modules/permissions/NavigatorPermissions.cpp
 Modules/permissions/PermissionController.cpp
 Modules/permissions/PermissionStatus.cpp
@@ -283,7 +282,6 @@ Modules/reporting/Report.cpp
 Modules/reporting/ReportBody.cpp
 Modules/reporting/ReportingObserver.cpp
 Modules/reporting/ReportingScope.cpp
-Modules/reporting/TestReportBody.cpp
 Modules/speech/SpeechRecognition.cpp
 Modules/speech/SpeechRecognitionAlternative.cpp
 Modules/speech/SpeechRecognitionErrorEvent.cpp
@@ -952,7 +950,6 @@ dom/ConstantPropertyMap.cpp
 dom/ContainerNode.cpp
 dom/ContainerNodeAlgorithms.cpp
 dom/ContextDestructionObserver.cpp
-dom/CustomElementDefaultARIA.cpp
 dom/CustomElementReactionQueue.cpp
 dom/CustomElementRegistry.cpp
 dom/CustomEvent.cpp
@@ -1192,7 +1189,6 @@ fileapi/FileReaderLoader.cpp
 fileapi/FileReaderSync.cpp
 fileapi/NetworkSendQueue.cpp
 fileapi/ThreadableBlobRegistry.cpp
-fileapi/URLKeepingBlobAlive.cpp
 history/BackForwardCache.cpp
 history/BackForwardController.cpp
 history/BackForwardItemIdentifier.cpp
@@ -1641,8 +1637,6 @@ layout/formattingContexts/table/TableFormattingState.cpp
 layout/formattingContexts/table/TableGrid.cpp
 layout/formattingContexts/table/TableLayout.cpp
 loader/ApplicationManifestLoader.cpp
-loader/COEPInheritenceViolationReportBody.cpp
-loader/CORPViolationReportBody.cpp
 loader/CanvasActivityRecord.cpp
 loader/ContentFilter.cpp
 loader/CookieJar.cpp
@@ -1862,6 +1856,7 @@ page/WindowOrWorkerGlobalScope.cpp
 page/WorkerNavigator.cpp
 page/csp/CSPViolationReportBody.cpp
 page/csp/ContentSecurityPolicy.cpp
+page/csp/ContentSecurityPolicyClient.cpp
 page/csp/ContentSecurityPolicyDirective.cpp
 page/csp/ContentSecurityPolicyDirectiveList.cpp
 page/csp/ContentSecurityPolicyDirectiveNames.cpp
@@ -2342,10 +2337,8 @@ plugins/DOMPluginArray.cpp
 plugins/PluginData.cpp
 plugins/PluginInfoProvider.cpp
 rendering/AutoTableLayout.cpp
-rendering/BackgroundPainter.cpp
 rendering/BidiRun.cpp
 rendering/BorderEdge.cpp
-rendering/BorderPainter.cpp
 rendering/BreakLines.cpp
 rendering/CSSFilter.cpp
 rendering/CaretRectComputation.cpp
@@ -3034,8 +3027,6 @@ JSCSSStyleSheet.cpp
 JSCSSSupportsRule.cpp
 JSCSSTransition.cpp
 JSCSSUnknownRule.cpp
-JSCOEPInheritenceViolationReportBody.cpp
-JSCORPViolationReportBody.cpp
 JSCacheQueryOptions.cpp
 JSCanvasCaptureMediaStreamTrack.cpp
 JSCanvasCompositing.cpp
@@ -3216,7 +3207,6 @@ JSFetchReferrerPolicy.cpp
 JSFetchRequest.cpp
 JSFetchRequestCache.cpp
 JSFetchRequestCredentials.cpp
-JSFetchRequestDestination.cpp
 JSFetchRequestInit.cpp
 JSFetchRequestMode.cpp
 JSFetchRequestRedirect.cpp
@@ -4009,7 +3999,6 @@ JSStyleSheet.cpp
 JSStyleSheetList.cpp
 JSSubmitEvent.cpp
 JSSubtleCrypto.cpp
-JSTestReportBody.cpp
 JSText.cpp
 JSTextDecoder.cpp
 JSTextDecoderStream.cpp
@@ -4070,6 +4059,7 @@ JSCSSTranslate.cpp
 JSCSSStyleValue.cpp
 JSCSSUnitValue.cpp
 JSCSSUnparsedValue.cpp
+JSEd25519Params.cpp
 JSUIEvent.cpp
 JSUIEventInit.cpp
 JSURLSearchParams.cpp
