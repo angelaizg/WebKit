@@ -32,11 +32,17 @@
 #include "JsonWebKey.h"
 #include <wtf/text/Base64.h>
 
+
+#include <wtf/CommaPrinter.h>
+#include <wtf/HexNumber.h>
+#include <wtf/text/UniquedStringImpl.h>
+
 namespace WebCore {
 
 static const ASCIILiteral P256 { "P-256"_s };
 static const ASCIILiteral P384 { "P-384"_s };
 static const ASCIILiteral P521 { "P-521"_s };
+static const ASCIILiteral Curve25519 { "Curve25519"_s };
 
 static std::optional<CryptoKeyEC::NamedCurve> toNamedCurve(const String& curve)
 {
@@ -46,9 +52,13 @@ static std::optional<CryptoKeyEC::NamedCurve> toNamedCurve(const String& curve)
         return CryptoKeyEC::NamedCurve::P384;
     if (curve == P521)
         return CryptoKeyEC::NamedCurve::P521;
+    if (curve ==  Curve25519)
+        return CryptoKeyEC::NamedCurve:: Curve25519;
 
     return std::nullopt;
 }
+
+
 
 CryptoKeyEC::CryptoKeyEC(CryptoAlgorithmIdentifier identifier, NamedCurve curve, CryptoKeyType type, PlatformECKeyContainer&& platformKey, bool extractable, CryptoKeyUsageBitmap usages)
     : CryptoKey(identifier, type, extractable, usages)
@@ -57,8 +67,27 @@ CryptoKeyEC::CryptoKeyEC(CryptoAlgorithmIdentifier identifier, NamedCurve curve,
 {
     // Only CryptoKeyEC objects for supported curves should be created.
     ASSERT(platformSupportedCurve(curve));
+   
 }
 
+/*
+const PlatformECKey CryptoKeyEC::platformKey()
+{
+    return  m_platformKey.index() == 0 ?  m_platformKey.get(): m_platformKey ;
+    
+}*/
+PlatformECKey CryptoKeyEC::platformKey() const
+{
+    
+    
+    return WTF::switchOn( m_platformKey, [&](const std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>& options) -> PlatformECKey{
+            return options.get();
+        }, [&](const Vector<uint8_t>& options) -> PlatformECKey{
+            return options;
+    });
+
+    
+}
 ExceptionOr<CryptoKeyPair> CryptoKeyEC::generatePair(CryptoAlgorithmIdentifier identifier, const String& curve, bool extractable, CryptoKeyUsageBitmap usages)
 {
     auto namedCurve = toNamedCurve(curve);
@@ -159,6 +188,9 @@ ExceptionOr<JsonWebKey> CryptoKeyEC::exportJwk() const
     case NamedCurve::P521:
         result.crv = P521;
         break;
+    case NamedCurve::Curve25519:
+        result.crv = Curve25519;
+        break;
     }
     result.key_ops = usages();
     result.ext = extractable();
@@ -198,6 +230,9 @@ String CryptoKeyEC::namedCurveString() const
         return String(P384);
     case NamedCurve::P521:
         return String(P521);
+    case NamedCurve::Curve25519:
+        return String(Curve25519);
+            
     }
 
     ASSERT_NOT_REACHED();
@@ -206,7 +241,7 @@ String CryptoKeyEC::namedCurveString() const
 
 bool CryptoKeyEC::isValidECAlgorithm(CryptoAlgorithmIdentifier algorithm)
 {
-    return algorithm == CryptoAlgorithmIdentifier::ECDSA || algorithm == CryptoAlgorithmIdentifier::ECDH;
+    return algorithm == CryptoAlgorithmIdentifier::ECDSA || algorithm == CryptoAlgorithmIdentifier::ECDH || algorithm == CryptoAlgorithmIdentifier:: Ed25519;
 }
 
 auto CryptoKeyEC::algorithm() const -> KeyAlgorithm
@@ -223,6 +258,9 @@ auto CryptoKeyEC::algorithm() const -> KeyAlgorithm
         break;
     case NamedCurve::P521:
         result.namedCurve = P521;
+        break;
+    case NamedCurve::Curve25519:
+            result.namedCurve = Curve25519;
         break;
     }
 

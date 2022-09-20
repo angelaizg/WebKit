@@ -33,14 +33,36 @@
 
 #if OS(DARWIN) && !PLATFORM(GTK)
 #include "CommonCryptoUtilities.h"
+#include <wtf/Vector.h>
 
-typedef CCECCryptorRef PlatformECKey;
+
+/*
+ struct corecrypto_ccec25519 {
+    union ec25519Key{
+        ccec25519secretkey priv;
+        ccec25519pubkey pub;
+        uint8_t *bytes;
+        
+    };
+    size_t key_nbits;
+ };
+typedef struct corecrypto_ccec25519 *ccec25519Ref;
+ */
+//typedef CCECCryptorRef PlatformECKey;
+
+//typedef std::variant<CCECCryptorRef,Vector<uint8_t>>PlatformECKey;
+typedef std::variant<CCECCryptorRef,Vector<uint8_t>>PlatformECKey;
+
 namespace WebCore {
 struct CCECCryptorRefDeleter {
     void operator()(CCECCryptorRef key) const { CCECCryptorRelease(key); }
 };
 }
+/*
 typedef std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter> PlatformECKeyContainer;
+ */
+
+typedef std::variant<std::unique_ptr<typename std::remove_pointer<CCECCryptorRef>::type, WebCore::CCECCryptorRefDeleter>,Vector<uint8_t>> PlatformECKeyContainer;
 #endif
 
 #if USE(GCRYPT)
@@ -66,6 +88,7 @@ public:
         P256,
         P384,
         P521,
+        Curve25519,
     };
 
     static Ref<CryptoKeyEC> create(CryptoAlgorithmIdentifier identifier, NamedCurve curve, CryptoKeyType type, PlatformECKeyContainer&& platformKey, bool extractable, CryptoKeyUsageBitmap usages)
@@ -89,7 +112,12 @@ public:
     size_t keySizeInBytes() const { return std::ceil(keySizeInBits() / 8.); }
     NamedCurve namedCurve() const { return m_curve; }
     String namedCurveString() const;
-    PlatformECKey platformKey() const { return m_platformKey.get(); }
+    /*
+    PlatformECKey platformKey() const { return  m_platformKey.index() == 0 ?  m_platformKey.get(): m_platformKey ; }
+     */
+    PlatformECKey platformKey() const;
+    //PlatformECKey platformKey() const { return    m_platformKey.get(); }
+    
     static bool isValidECAlgorithm(CryptoAlgorithmIdentifier);
 
 private:

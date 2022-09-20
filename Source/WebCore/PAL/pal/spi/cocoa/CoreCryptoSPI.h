@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2022 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,33 +25,50 @@
 
 #pragma once
 
-#if ENABLE(WEB_CRYPTO)
+extern "C" {
 
-namespace WebCore {
+#if USE(APPLE_INTERNAL_SDK)
+#include <corecrypto/ccec25519.h>
+#else
 
-enum class CryptoAlgorithmIdentifier {
-    RSAES_PKCS1_v1_5 = 1,
-    RSASSA_PKCS1_v1_5,
-    RSA_PSS,
-    RSA_OAEP,
-    ECDSA,
-    ECDH,
-    Ed25519,
-    AES_CTR,
-    AES_CBC,
-    AES_GCM,
-    AES_CFB,
-    AES_KW,
-    HMAC,
-    SHA_1,
-    SHA_224,
-    SHA_256,
-    SHA_384,
-    SHA_512,
-    HKDF,
-    PBKDF2
+#define CC_SPTR(_sn_, _n_) _n_
+
+#define CC_WIDE_NULL NULL
+
+#define CCRNG_STATE_COMMON \
+    int (*CC_SPTR(ccrng_state, generate))(struct ccrng_state *rng, size_t outlen, void *out);
+
+struct ccrng_state {
+    CCRNG_STATE_COMMON
 };
+struct ccrng_state *ccrng(int *error);
 
-} // namespace WebCore
+#define ccrng_generate(rng, outlen, out) \
+    ((rng)->generate((struct ccrng_state *)(rng), (outlen), (out)))
 
-#endif // ENABLE(WEB_CRYPTO)
+typedef uint8_t ccec25519key[32];
+typedef ccec25519key ccec25519secretkey;
+typedef ccec25519key ccec25519pubkey;
+typedef ccec25519key ccec25519base;
+
+void cccurve25519(ccec25519key out, const ccec25519secretkey sk, const ccec25519base base);
+inline void cccurve25519_make_priv(struct ccrng_state *rng, ccec25519secretkey sk)
+{
+    ccrng_generate(rng, 32, sk);
+    sk[0] &= 248;
+    sk[31] &= 127;
+    sk[31] |= 64;
+}
+inline void cccurve25519_make_pub(ccec25519pubkey pk, const ccec25519secretkey sk)
+{
+    cccurve25519(pk, sk, CC_WIDE_NULL);
+}
+inline void cccurve25519_make_key_pair(struct ccrng_state *rng, ccec25519pubkey pk, ccec25519secretkey sk)
+{
+    cccurve25519_make_priv(rng, sk);
+    cccurve25519_make_pub(pk, sk);
+}
+
+#endif // USE(APPLE_INTERNAL_SDK)
+
+} // extern "C"

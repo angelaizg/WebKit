@@ -38,7 +38,9 @@ std::optional<Vector<uint8_t>> CryptoAlgorithmECDH::platformDeriveBits(const Cry
     std::optional<Vector<uint8_t>> result = std::nullopt;
     Vector<uint8_t> derivedKey(baseKey.keySizeInBytes()); // Per https://tools.ietf.org/html/rfc6090#section-4.
     size_t size = derivedKey.size();
-    if (!CCECCryptorComputeSharedSecret(baseKey.platformKey(), publicKey.platformKey(), derivedKey.data(), &size))
+    CCECCryptorRef ccecc_basekey = std::get<CCECCryptorRef>(baseKey.platformKey());
+    CCECCryptorRef ccecc_publickey = std::get<CCECCryptorRef>( publicKey.platformKey());
+    if (!CCECCryptorComputeSharedSecret(ccecc_basekey,ccecc_publickey, derivedKey.data(), &size))
         result = WTFMove(derivedKey);
     return result;
 }
